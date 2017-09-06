@@ -1,0 +1,30 @@
+{
+  "name": "corp-check-rest",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "start": "npm run build && functionly local",
+    "build": "node_modules/.bin/tsc",
+    "build:watch": "node_modules/.bin/tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaystack/corp-check-rest.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaystack/corp-check-rest/issues"
+  },
+  "homepage": "https://github.com/jaystack/corp-check-rest#readme",
+  "devDependencies": {
+    "@types/node": "^6.0.88",
+    "typescript": "^2.5.2"
+  },
+  "dependencies": {
+    "functionly": "^0.0.6",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4",
+    "shortid": "^2.2.8"
+  }
+}
