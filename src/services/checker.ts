@@ -50,7 +50,7 @@ export class UpdatePackageResult extends Service {
             UpdateExpression: "set validationResult = :r, validationState=:s, validationData=:d",
             ExpressionAttributeValues: {
                 ":r": result,
-                ":s": { state, cid },
+                ":s": { state, date: new Date().toISOString(), cid },
                 ":d": data
             },
             ReturnValues: "UPDATED_NEW"
@@ -72,15 +72,17 @@ export class CreatePackageResult extends Service {
         if (!packageJSON) throw new MissingPackageParameters('missing packageJSON')
 
         const id = generate()
+        const date = new Date().toISOString()
         const item = {
             id,
             packageName: name,
             packageVersion: version,
             packageJSON: JSON.stringify(packageJSON),
             isNpmPackage,
-            date: new Date().toISOString(),
+            date,
             validationState: {
                 cid: id,
+                date,
                 state: 'Inprogress...'
             },
             validationResult: null

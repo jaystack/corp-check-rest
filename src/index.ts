@@ -95,7 +95,12 @@ export class Complete extends CorpjsCorpcheckService {
         @inject(Evaluate) evaluate
     ) {
         const result = evaluate({ data })
-        await updatePackageResult({ cid, data, result, state: 'Completed' })
+        await updatePackageResult({
+            cid,
+            data: JSON.stringify(data),
+            result,
+            state: 'Completed'
+        })
 
         return { ok: 1 }
     }
