@@ -1,6 +1,6 @@
 {
     "plugins": [
-        "./lib/deploy/ecsRole"
+        "./functionly-plugin/ecsRole"
     ],
     "debug": false,
     "awsRegion": "eu-central-1",
