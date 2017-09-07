@@ -10,14 +10,15 @@ export class GetPackageResult extends Service {
     public async handle(
         @param name,
         @param version,
+        @param isProduction,
         @param cid,
         @inject(ValidationsResults) validationInfoTable: ValidationsResults
     ): Promise<any> {
         let params = null
         if (name && version) {
             params = {
-                FilterExpression: 'packageName = :name and packageVersion = :version and isNpmPackage = :isNpmPackage',
-                ExpressionAttributeValues: { ':name': name, ':version': version, ':isNpmPackage': true }
+                FilterExpression: 'packageName = :name and packageVersion = :version and isNpmPackage = :isNpmPackage and isProduction = :isProduction',
+                ExpressionAttributeValues: { ':name': name, ':version': version, ':isNpmPackage': true, ':isProduction': !!isProduction }
             }
         } else if (cid) {
             params = {
@@ -65,6 +66,7 @@ export class CreatePackageResult extends Service {
     public async handle(
         @param name,
         @param version,
+        @param isProduction,
         @param packageJSON,
         @param isNpmPackage = false,
         @inject(ValidationsResults) validationInfoTable: ValidationsResults
@@ -79,6 +81,7 @@ export class CreatePackageResult extends Service {
             packageVersion: version,
             packageJSON: JSON.stringify(packageJSON),
             isNpmPackage,
+            isProduction,
             date,
             validationState: {
                 cid: id,
@@ -98,6 +101,7 @@ export class CreatePackageResult extends Service {
 export class StartPackageValidation extends Service {
     public async handle(
         @param packageJSON,
+        @param isProduction,
         @param cid,
     ) {
         return new Promise(resolve => setTimeout(resolve, 50))
