@@ -1,23 +1,9 @@
-import { Service, param, injectable, inject, InjectionScope } from 'functionly';
+import { Service, param, injectable, inject, InjectionScope, environment, getFunctionName } from 'functionly';
 import { ValidationsResults } from '../tables/validationResults';
 import { generate } from 'shortid';
-import AWS = require('aws-sdk');
+import * as AWS from 'aws-sdk';
 
 export class MissingPackageParameters extends Error {}
-
-export type TaskOptions = {
-  region: string;
-  cluster: string;
-  taskDefinition: string;
-  name: string;
-};
-
-const defaultOptions = {
-  region: 'eu-central-1',
-  cluster: 'checkers',
-  taskDefinition: 'check',
-  name: 'checker'
-};
 
 @injectable(InjectionScope.Singleton)
 export class GetPackageResult extends Service {
@@ -117,13 +103,21 @@ export class CreatePackageResult extends Service {
 }
 
 @injectable(InjectionScope.Singleton)
+@environment('TASKOPTION_CLUSTER', 'checkers')
+@environment('TASKOPTION_TASKDEFINITION', 'check')
+@environment('TASKOPTION_TASKNAME', 'checker')
+@environment('TASKOPTION_TASKREGION', 'eu-central-1')
+@environment('TASKOPTION_COMPLETELAMBDAREGION', '')
+@environment('FUNCTIONAL_SERVICE_COMPLETE', 'Complete')
 export class StartPackageValidation extends Service {
-  public async handle(
-    @param cid,
-    @param packageJSON,
-    @param isProduction,
-    @param('options') { region, cluster, taskDefinition, name }: TaskOptions = defaultOptions
-  ) {
+  public async handle(@param cid, @param packageJSON, @param isProduction) {
+    const cluster = process.env.TASKOPTION_CLUSTER || 'checkers';
+    const taskDefinition = process.env.TASKOPTION_TASKDEFINITION || 'check';
+    const taskName = process.env.TASKOPTION_TASKNAME || 'checker';
+    const region = process.env.TASKOPTION_REGION || process.env.AWS_REGION || 'eu-central-1';
+    const completeLambda = process.env.TASKOPTION_COMPLETELAMBDAREGION || process.env.AWS_REGION || 'eu-central-1';
+    const resolvedFuncName = process.env.FUNCTIONAL_SERVICE_COMPLETE;
+
     return new Promise((resolve, reject) => {
       new AWS.ECS({ region }).runTask(
         {
@@ -132,9 +126,13 @@ export class StartPackageValidation extends Service {
           overrides: {
             containerOverrides: [
               {
-                name,
+                name: taskName,
                 command: [ 'node', '.', cid, packageJSON ],
-                environment: [ { name: 'NODE_ENV', value: isProduction ? 'production' : 'dev' } ]
+                environment: [
+                  { name: 'NODE_ENV', value: isProduction ? 'production' : 'dev' },
+                  { name: 'REGION', value: region },
+                  { name: 'COMPLETE_LAMBDA_NAME', value: resolvedFuncName }
+                ]
               }
             ]
           }
