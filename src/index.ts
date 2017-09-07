@@ -17,26 +17,24 @@ export class Validation extends CorpjsCorpcheckService {
     public async handle(
         @param name,
         @param version,
-        @param isProduction,
         @inject(GetPackageInfo) getPackageInfo,
         @inject(GetPackageResult) getPackageResult,
         @inject(CreatePackageResult) createPackageResult,
         @inject(StartPackageValidation) startPackageValidation
     ) {
-        const isProd = typeof isProduction !== 'undefined'
         const packageInfo = await getPackageInfo({ name, version })
-        let item = await getPackageResult({ name: packageInfo.name, version: packageInfo.version, isProduction: isProd })
+        let item = await getPackageResult({ name: packageInfo.name, version: packageInfo.version, isProduction: true })
 
         if (item === null) {
             item = await createPackageResult({
                 name: packageInfo.name,
                 version: packageInfo.version,
                 isNpmPackage: true,
-                isProduction: isProd,
+                isProduction: true,
                 packageJSON: packageInfo.packageJSON
             })
 
-            await startPackageValidation({ packageJSON: item.packageJSON, cid: item.id, isProduction: isProd })
+            await startPackageValidation({ packageJSON: item.packageJSON, cid: item.id, isProduction: true })
         }
 
 
@@ -53,9 +51,14 @@ export class PackageJsonValidation extends CorpjsCorpcheckService {
         @inject(CreatePackageResult) createPackageResult,
         @inject(StartPackageValidation) startPackageValidation
     ) {
-        const item = await createPackageResult({ packageJSON })
+        const isProd = typeof isProduction !== 'undefined'
+        const item = await createPackageResult({
+            isNpmPackage: false,
+            isProduction: isProd,
+            packageJSON
+        })
 
-        await startPackageValidation({ packageJSON: item.packageJSON, cid: item.id, isProduction: typeof isProduction !== 'undefined' })
+        await startPackageValidation({ packageJSON: item.packageJSON, cid: item.id, isProduction: isProd })
 
         return { item, cid: item.id }
     }
@@ -68,7 +71,6 @@ export class Package extends CorpjsCorpcheckService {
     public async handle(
         @param name,
         @param version,
-        @param isProduction,
         @param cid,
         @inject(GetPackageInfo) getPackageInfo,
         @inject(GetPackageResult) getPackageResult
@@ -78,7 +80,7 @@ export class Package extends CorpjsCorpcheckService {
             version = packageInfo.version
         }
 
-        const item = await getPackageResult({ name, version, cid, isProduction: typeof isProduction !== 'undefined' })
+        const item = await getPackageResult({ name, version, cid, isProduction: true })
 
         return {
             package: packageInfo,
