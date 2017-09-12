@@ -1,6 +1,6 @@
-import { DynamoTable } from 'functionly'
-import { injectable, dynamoTable} from 'functionly'
+import { DynamoTable } from 'functionly';
+import { injectable, dynamoTable } from 'functionly';
 
 @injectable()
 @dynamoTable({ tableName: '%ClassName%_corp_check' })
-export class ValidationsResults extends DynamoTable { }
+export class ValidationsResults extends DynamoTable {}
