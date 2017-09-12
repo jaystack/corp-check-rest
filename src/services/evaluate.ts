@@ -6,7 +6,7 @@ export type Evaluation = {
   meta: any; // meta for custom data visualization
 };
 
-export type Evaluator = (data: any) => Promise<Evaluation>;
+export type Evaluator = ({ data }) => Promise<Evaluation>;
 
 export type Qualification = 'RECOMMENDED' | 'ACCEPTED' | 'REJECTED';
 
@@ -26,7 +26,7 @@ const qualificate = (finalScore: number): Qualification => {
 export class Evaluate extends Service {
   public async handle(@param data, @param cid) {
     const evaluators: Evaluator[] = []; // evaulators are injectable services
-    const evaluations: Evaluation[] = await Promise.all(evaluators.map(evaluator => evaluator(data)));
+    const evaluations: Evaluation[] = await Promise.all(evaluators.map(evaluator => evaluator({ data })));
     const finalScore = evaluations.reduce((acc, { score }) => acc * score, 1);
     return {
       evaluations,
