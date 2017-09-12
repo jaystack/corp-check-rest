@@ -27,8 +27,7 @@ export class Evaluate extends Service {
   public async handle(@param data, @param cid) {
     const evaluators: Evaluator[] = []; // evaulators are injectable services
     const evaluations: Evaluation[] = await Promise.all(evaluators.map(evaluator => evaluator(data)));
-    const weights: number[] = evaluations.map(() => 1); // trivial weights
-    const finalScore = evaluations.reduce((acc, { score }, i) => acc * score * weights[i], 1);
+    const finalScore = evaluations.reduce((acc, { score }) => acc * score, 1);
     return {
       evaluations,
       finalScore,
