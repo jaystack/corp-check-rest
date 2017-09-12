@@ -6,6 +6,7 @@ import { GetPackageInfo } from './services/npm';
 import { Evaluate } from './services/evaluate';
 import { GetPackageResult, UpdatePackageResult, CreatePackageResult, StartPackageValidation } from './services/checker';
 import { ValidationsResults } from './tables/validationResults';
+import request = require('request-promise-native');
 
 @aws({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
 export class CorpjsCorpcheckService extends FunctionalService {}
@@ -111,7 +112,25 @@ class Complete extends CorpjsCorpcheckService {
   }
 }
 
+@use(ErrorTransform)
+@rest({ path: '/versions', methods: [ 'get' ], anonymous: true, cors: true })
+export class GetPackageVersions extends CorpjsCorpcheckService {
+  public async handle(@param name, @param version): Promise<string[]> {
+    if (!name) return [];
+    const pattern = new RegExp(`^${version}`);
+    const response = await request({
+      uri: `https://registry.npmjs.org/${name}`,
+      json: true
+    });
+    return Object.keys(response.versions)
+      .reverse()
+      .filter(version => pattern.test(version))
+      .map(version => `${name}@${version}`);
+  }
+}
+
 export const validation = Validation.createInvoker();
 export const packageJsonValidation = PackageJsonValidation.createInvoker();
 export const packageInfo = Package.createInvoker();
 export const complete = Complete.createInvoker();
+export const getVersions = GetPackageVersions.createInvoker();
