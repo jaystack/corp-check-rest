@@ -117,7 +117,7 @@ class Complete extends CorpjsCorpcheckService {
 export class GetPackageVersions extends CorpjsCorpcheckService {
   public async handle(@param name, @param version): Promise<string[]> {
     if (!name) return [];
-    const pattern = new RegExp(`^${version}`);
+    const pattern = new RegExp(`^${version.replace(/\./g, '\\.')}`);
     const response = await request({
       uri: `https://registry.npmjs.org/${name}`,
       json: true
