@@ -22,7 +22,7 @@
     "typescript": "^2.5.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.110.0",
+    "aws-sdk": "^2.113.0",
     "functionly": "^0.0.9",
     "moment": "^2.18.1",
     "request": "^2.81.0",
