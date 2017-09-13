@@ -4,7 +4,13 @@ import { rest, aws, param, inject, use } from 'functionly';
 import { ErrorTransform } from './middleware/errorTransform';
 import { GetPackageInfo } from './services/npm';
 import { Evaluate } from './services/evaluate';
-import { GetPackageResult, UpdatePackageResult, CreatePackageResult, StartPackageValidation } from './services/checker';
+import {
+  GetPackageResult,
+  UpdatePackageResult,
+  CreatePackageResult,
+  StartPackageValidation,
+  IsExpiredResult
+} from './services/checker';
 import { ValidationsResults } from './tables/validationResults';
 
 @aws({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
@@ -16,13 +22,19 @@ export class Validation extends CorpjsCorpcheckService {
   public async handle(
     @param name,
     @param version,
+    @param force,
     @inject(GetPackageInfo) getPackageInfo,
     @inject(GetPackageResult) getPackageResult,
     @inject(CreatePackageResult) createPackageResult,
-    @inject(StartPackageValidation) startPackageValidation
+    @inject(StartPackageValidation) startPackageValidation,
+    @inject(IsExpiredResult) isExpiredResult
   ) {
     const packageInfo = await getPackageInfo({ name, version });
     let item = await getPackageResult({ name: packageInfo.name, version: packageInfo.version, isProduction: true });
+
+    if (item && (await isExpiredResult({ item, update: true, force: typeof force !== 'undefined' }))) {
+      item = null;
+    }
 
     if (item === null) {
       item = await createPackageResult({
@@ -70,7 +82,9 @@ export class Package extends CorpjsCorpcheckService {
     @param version,
     @param cid,
     @inject(GetPackageInfo) getPackageInfo,
-    @inject(GetPackageResult) getPackageResult
+    @inject(GetPackageResult) getPackageResult,
+    @inject(IsExpiredResult) isExpiredResult,
+    @inject(Evaluate) evaluate
   ) {
     if (name && !version) {
       const packageInfo = await getPackageInfo({ name });
@@ -78,13 +92,29 @@ export class Package extends CorpjsCorpcheckService {
     }
 
     const item = await getPackageResult({ name, version, cid, isProduction: true });
+    let expired = false;
+
+    if (name && version) {
+      if (item && (await isExpiredResult({ item, update: false, force: false }))) {
+        expired = true;
+      }
+    } else {
+      expired = undefined;
+    }
+
+    let result = {};
+    if (item && item.validationData && item.validationState.state === 'SUCCEEDED') {
+      result = await evaluate({ data: JSON.parse(item.validationData) });
+    }
 
     return {
       package: packageInfo,
       item,
       name,
       version,
-      cid: item && item.id
+      cid: item && item.id,
+      expired,
+      result
     };
   }
 }
@@ -93,19 +123,20 @@ export class Package extends CorpjsCorpcheckService {
 @rest({ path: '/complete', methods: [ 'post' ] })
 export //TODO remove
 class Complete extends CorpjsCorpcheckService {
-  public async handle(
-    @param cid,
-    @param data,
-    @inject(UpdatePackageResult) updatePackageResult,
-    @inject(Evaluate) evaluate
-  ) {
-    const result = evaluate({ data });
-    await updatePackageResult({
-      cid,
-      data: JSON.stringify(data),
-      result,
-      state: 'Completed'
-    });
+  public async handle(@param cid, @param data, @param error, @inject(UpdatePackageResult) updatePackageResult) {
+    if (error) {
+      await updatePackageResult({
+        cid,
+        result: JSON.stringify(error),
+        state: 'FAILED'
+      });
+    } else {
+      await updatePackageResult({
+        cid,
+        data: JSON.stringify(data),
+        state: 'SUCCEEDED'
+      });
+    }
 
     return { ok: 1 };
   }

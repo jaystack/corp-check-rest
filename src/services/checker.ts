@@ -1,9 +1,52 @@
 import { Service, param, injectable, inject, InjectionScope, environment, getFunctionName } from 'functionly';
 import { ValidationsResults } from '../tables/validationResults';
 import { generate } from 'shortid';
+import * as moment from 'moment';
 import * as AWS from 'aws-sdk';
 
 export class MissingPackageParameters extends Error {}
+
+@injectable(InjectionScope.Singleton)
+@environment('PACKAGE_VALIDATION_EXPIRATION_IN_DAYS', '30')
+@environment('PACKAGE_PENDING_EXPIRATION_IN_MINUTES', '10')
+export class IsExpiredResult extends Service {
+  public async handle(
+    @param item,
+    @param update,
+    @param force,
+    @inject(ValidationsResults) validationInfoTable: ValidationsResults
+  ): Promise<any> {
+    var now = moment(new Date());
+    var end = moment(item.date);
+    var duration = moment.duration(now.diff(end));
+    var minutes = duration.asMinutes();
+    var hours = duration.asHours();
+
+    const pendingMaxMinutes = process.env.PACKAGE_PENDING_EXPIRATION_IN_MINUTES || 10;
+    const successMaxHours = process.env.PACKAGE_VALIDATION_EXPIRATION_IN_DAYS * 24 * 60 || 24 * 60;
+
+    if (
+      force ||
+      item.validationState.state === 'FAILED' ||
+      (item.validationState.state === 'PENDING' && minutes > pendingMaxMinutes) ||
+      (item.validationState.state === 'SUCCEEDED' && hours > successMaxHours)
+    ) {
+      if (force || update) {
+        await validationInfoTable.update({
+          Key: {
+            id: item.id
+          },
+          UpdateExpression: 'set latest = :l',
+          ExpressionAttributeValues: { ':l': false },
+          ReturnValues: 'UPDATED_NEW'
+        });
+      }
+
+      return true;
+    }
+    return false;
+  }
+}
 
 @injectable(InjectionScope.Singleton)
 export class GetPackageResult extends Service {
@@ -18,12 +61,13 @@ export class GetPackageResult extends Service {
     if (name && version) {
       params = {
         FilterExpression:
-          'packageName = :name and packageVersion = :version and isNpmPackage = :isNpmPackage and isProduction = :isProduction',
+          'packageName = :name and packageVersion = :version and isNpmPackage = :isNpmPackage and isProduction = :isProduction and latest = :latest',
         ExpressionAttributeValues: {
           ':name': name,
           ':version': version,
           ':isNpmPackage': true,
-          ':isProduction': !!isProduction
+          ':isProduction': !!isProduction,
+          ':latest': true
         }
       };
     } else if (cid) {
@@ -55,9 +99,9 @@ export class UpdatePackageResult extends Service {
       },
       UpdateExpression: 'set validationResult = :r, validationState=:s, validationData=:d',
       ExpressionAttributeValues: {
-        ':r': result,
+        ':r': result || null,
         ':s': { state, date: new Date().toISOString(), cid },
-        ':d': data
+        ':d': data || null
       },
       ReturnValues: 'UPDATED_NEW'
     });
@@ -91,8 +135,9 @@ export class CreatePackageResult extends Service {
       validationState: {
         cid: id,
         date,
-        state: 'Inprogress...'
+        state: 'PENDING'
       },
+      latest: true,
       validationResult: null
     };
 
