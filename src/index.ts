@@ -11,7 +11,6 @@ import {
   StartPackageValidation,
   IsExpiredResult
 } from './services/checker';
-import { ValidationsResults } from './tables/validationResults';
 import request = require('request-promise-native');
 
 @aws({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
@@ -46,10 +45,10 @@ export class Validation extends CorpjsCorpcheckService {
         packageJSON: packageInfo.packageJSON
       });
 
-      await startPackageValidation({ packageJSON: item.packageJSON, cid: item.id, isProduction: true });
+      await startPackageValidation({ packageJSON: item.packageJSON, cid: item._id, isProduction: true });
     }
 
-    return { item, cid: item.id };
+    return { item, cid: item._id };
   }
 }
 
@@ -69,9 +68,9 @@ export class PackageJsonValidation extends CorpjsCorpcheckService {
       packageJSON
     });
 
-    await startPackageValidation({ packageJSON: item.packageJSON, cid: item.id, isProduction: isProd });
+    await startPackageValidation({ packageJSON: item.packageJSON, cid: item._id, isProduction: isProd });
 
-    return { item, cid: item.id };
+    return { item, cid: item._id };
   }
 }
 
@@ -113,7 +112,7 @@ export class Package extends CorpjsCorpcheckService {
       item,
       name,
       version,
-      cid: item && item.id,
+      cid: item && item._id,
       expired,
       result
     };

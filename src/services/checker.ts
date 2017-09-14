@@ -32,14 +32,12 @@ export class IsExpiredResult extends Service {
       (item.validationState.state === 'SUCCEEDED' && hours > successMaxHours)
     ) {
       if (force || update) {
-        await validationInfoTable.update({
-          Key: {
-            id: item.id
-          },
-          UpdateExpression: 'set latest = :l',
-          ExpressionAttributeValues: { ':l': false },
-          ReturnValues: 'UPDATED_NEW'
-        });
+        await validationInfoTable.updateOne(
+          { _id: item._id },
+          {
+            latest: false
+          }
+        );
       }
 
       return true;
@@ -60,27 +58,22 @@ export class GetPackageResult extends Service {
     let params = null;
     if (name && version) {
       params = {
-        FilterExpression:
-          'packageName = :name and packageVersion = :version and isNpmPackage = :isNpmPackage and isProduction = :isProduction and latest = :latest',
-        ExpressionAttributeValues: {
-          ':name': name,
-          ':version': version,
-          ':isNpmPackage': true,
-          ':isProduction': !!isProduction,
-          ':latest': true
-        }
+        packageName: name,
+        packageVersion: version,
+        isNpmPackage: true,
+        isProduction: !!isProduction,
+        latest: true
       };
     } else if (cid) {
       params = {
-        FilterExpression: 'id = :cid',
-        ExpressionAttributeValues: { ':cid': cid }
+        _id: cid
       };
     }
 
     if (!params) throw new MissingPackageParameters();
 
-    const result = await validationInfoTable.scan(params);
-    return (result.Items && result.Items.length && result.Items[0]) || null;
+    const result = await validationInfoTable.find(params).toArray();
+    return (result[0]) || null;
   }
 }
 
@@ -93,18 +86,14 @@ export class UpdatePackageResult extends Service {
     @param state,
     @inject(ValidationsResults) validationInfoTable: ValidationsResults
   ): Promise<any> {
-    const updated = await validationInfoTable.update({
-      Key: {
-        id: cid
-      },
-      UpdateExpression: 'set validationResult = :r, validationState=:s, validationData=:d',
-      ExpressionAttributeValues: {
-        ':r': result || null,
-        ':s': { state, date: new Date().toISOString(), cid },
-        ':d': data || null
-      },
-      ReturnValues: 'UPDATED_NEW'
-    });
+    const updated = await validationInfoTable.updateOne(
+      { _id: cid },
+      {
+        validationResult: result || null,
+        validationState: { state, date: new Date().toISOString(), cid },
+        validationData: data || null
+      }
+    );
 
     return { updated };
   }
@@ -122,10 +111,10 @@ export class CreatePackageResult extends Service {
   ) {
     if (!packageJSON) throw new MissingPackageParameters('missing packageJSON');
 
-    const id = generate();
+    const _id = generate();
     const date = new Date().toISOString();
     const item = {
-      id,
+      _id,
       packageName: name,
       packageVersion: version,
       packageJSON: JSON.stringify(packageJSON),
@@ -133,7 +122,7 @@ export class CreatePackageResult extends Service {
       isProduction,
       date,
       validationState: {
-        cid: id,
+        cid: _id,
         date,
         state: 'PENDING'
       },
@@ -141,7 +130,7 @@ export class CreatePackageResult extends Service {
       validationResult: null
     };
 
-    await validationInfoTable.put({ Item: item });
+    await validationInfoTable.insertOne(item);
 
     return item;
   }

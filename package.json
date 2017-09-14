@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "start": "npm run build && functionly local",
+    "start": "npm run build && cross-env MONGOLOCALURL=mongod://localhost:27017/corp-check functionly local",
+    "start:f": "cross-env MONGOLOCALURL=mongodb://localhost:27017/corp-check functionly local",
     "build": "node_modules/.bin/tsc",
     "build:watch": "node_modules/.bin/tsc -w"
   },
@@ -19,11 +20,12 @@
   "homepage": "https://github.com/jaystack/corp-check-rest#readme",
   "devDependencies": {
     "@types/node": "^6.0.88",
+    "cross-env": "^5.0.5",
     "typescript": "^2.5.2"
   },
   "dependencies": {
     "aws-sdk": "^2.113.0",
-    "functionly": "^0.0.9",
+    "functionly": "^0.0.10",
     "moment": "^2.18.1",
     "request": "^2.81.0",
     "request-promise-native": "^1.0.4",

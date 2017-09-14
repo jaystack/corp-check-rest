@@ -1,6 +1,7 @@
-import { DynamoTable } from 'functionly';
-import { injectable, dynamoTable } from 'functionly';
+import { DynamoTable, MongoCollection } from 'functionly';
+import { injectable, mongoCollection, mongoConnection } from 'functionly';
 
 @injectable()
-@dynamoTable({ tableName: '%ClassName%_corp_check' })
-export class ValidationsResults extends DynamoTable {}
+@mongoConnection(process.env.MONGOLOCALURL || 'mongodb://18.194.50.126:27017/corp-check')
+@mongoCollection({ collectionName: '%ClassName%_corp_check' })
+export class ValidationsResults extends MongoCollection {}
