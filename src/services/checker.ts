@@ -35,7 +35,9 @@ export class IsExpiredResult extends Service {
         await validationInfoTable.updateOne(
           { _id: item._id },
           {
-            latest: false
+            $set: {
+              latest: false
+            }
           }
         );
       }
@@ -73,7 +75,7 @@ export class GetPackageResult extends Service {
     if (!params) throw new MissingPackageParameters();
 
     const result = await validationInfoTable.find(params).toArray();
-    return (result[0]) || null;
+    return result[0] || null;
   }
 }
 
@@ -89,9 +91,11 @@ export class UpdatePackageResult extends Service {
     const updated = await validationInfoTable.updateOne(
       { _id: cid },
       {
-        validationResult: result || null,
-        validationState: { state, date: new Date().toISOString(), cid },
-        validationData: data || null
+        $set: {
+          validationResult: result || null,
+          validationState: { state, date: new Date().toISOString(), cid },
+          validationData: data || null
+        }
       }
     );
 

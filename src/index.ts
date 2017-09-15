@@ -1,5 +1,5 @@
 import { generate } from 'shortid';
-import { FunctionalService, DynamoTable, Service, Api } from 'functionly';
+import { FunctionalService, DynamoTable, Service, Api, NoCallbackWaitsForEmptyEventLoop } from 'functionly';
 import { rest, aws, param, inject, use } from 'functionly';
 import { ErrorTransform } from './middleware/errorTransform';
 import { GetPackageInfo } from './services/npm';
@@ -14,11 +14,12 @@ import {
 import request = require('request-promise-native');
 
 @aws({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
-export class CorpjsCorpcheckService extends FunctionalService {}
-
+@use(NoCallbackWaitsForEmptyEventLoop)
 @use(ErrorTransform)
+export class CorpCheckRestService extends FunctionalService {}
+
 @rest({ path: '/validation', methods: [ 'get' ], anonymous: true, cors: true })
-export class Validation extends CorpjsCorpcheckService {
+export class Validation extends CorpCheckRestService {
   public async handle(
     @param name,
     @param version,
@@ -52,9 +53,8 @@ export class Validation extends CorpjsCorpcheckService {
   }
 }
 
-@use(ErrorTransform)
 @rest({ path: '/validation', methods: [ 'post' ], anonymous: true, cors: true })
-export class PackageJsonValidation extends CorpjsCorpcheckService {
+export class PackageJsonValidation extends CorpCheckRestService {
   public async handle(
     @param packageJSON,
     @param isProduction,
@@ -74,9 +74,8 @@ export class PackageJsonValidation extends CorpjsCorpcheckService {
   }
 }
 
-@use(ErrorTransform)
 @rest({ path: '/package', methods: [ 'get' ], anonymous: true, cors: true })
-export class Package extends CorpjsCorpcheckService {
+export class Package extends CorpCheckRestService {
   public async handle(
     @param name,
     @param version,
@@ -119,10 +118,9 @@ export class Package extends CorpjsCorpcheckService {
   }
 }
 
-@use(ErrorTransform)
+//TODO remove
 @rest({ path: '/complete', methods: [ 'post' ] })
-export //TODO remove
-class Complete extends CorpjsCorpcheckService {
+export class Complete extends CorpCheckRestService {
   public async handle(@param cid, @param data, @param error, @inject(UpdatePackageResult) updatePackageResult) {
     if (error) {
       await updatePackageResult({
@@ -142,9 +140,8 @@ class Complete extends CorpjsCorpcheckService {
   }
 }
 
-@use(ErrorTransform)
 @rest({ path: '/versions', methods: [ 'get' ], anonymous: true, cors: true })
-export class GetPackageVersions extends CorpjsCorpcheckService {
+export class GetPackageVersions extends CorpCheckRestService {
   public async handle(@param name, @param version): Promise<string[]> {
     if (!name) return [];
     const pattern = new RegExp(`^${version.replace(/\./g, '\\.')}`);
