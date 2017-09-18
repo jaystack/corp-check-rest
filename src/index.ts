@@ -1,6 +1,7 @@
 import { generate } from 'shortid';
 import { FunctionalService, DynamoTable, Service, Api, NoCallbackWaitsForEmptyEventLoop } from 'functionly';
 import { rest, aws, param, inject, use } from 'functionly';
+import { stringify } from 'querystring';
 import { ErrorTransform } from './middleware/errorTransform';
 import { GetPackageInfo } from './services/npm';
 import { Evaluate } from './services/evaluate';
@@ -140,19 +141,47 @@ export class Complete extends CorpCheckRestService {
   }
 }
 
-@rest({ path: '/versions', methods: [ 'get' ], anonymous: true, cors: true })
-export class GetPackageVersions extends CorpCheckRestService {
-  public async handle(@param name, @param version): Promise<string[]> {
+@rest({ path: '/suggestions', methods: [ 'get' ], anonymous: true, cors: true })
+export class GetSuggestions extends CorpCheckRestService {
+  public async handle(@param name, @param version): Promise<{ title: string; description?: string }[]> {
     if (!name) return [];
-    const pattern = new RegExp(`^${version.replace(/\./g, '\\.')}`);
-    const response = await request({
-      uri: `https://registry.npmjs.org/${name}`,
-      json: true
-    });
-    return Object.keys(response.versions)
-      .reverse()
-      .filter(version => pattern.test(version))
-      .map(version => `${name}@${version}`);
+    return await request
+      .post(
+        'https://ofcncog2cu-dsn.algolia.net/1/indexes/*/queries?x-algolia-application-id=OFCNCOG2CU&x-algolia-api-key=f54e21fa3a2a0160595bb058179bfb1e',
+        {
+          json: true,
+          body: {
+            requests: [
+              {
+                indexName: 'npm-search',
+                params: stringify({
+                  query: name,
+                  optionalFacetFilters: `concatenatedName:${name}`,
+                  hitsPerPage: '5',
+                  maxValuesPerFacet: '10',
+                  page: '0',
+                  attributesToRetrieve: '["name","description","versions"]',
+                  facets: '["keywords","keywords"]',
+                  tagFilters: ''
+                })
+              }
+            ]
+          }
+        }
+      )
+      .then(json => {
+        const hits = json.results[0].hits;
+        if (version === undefined) return hits.map(({ name, description }) => ({ title: name, description }));
+        const exactHit = hits.find(({ name: n }) => n === name);
+        if (!exactHit) return [];
+        const pattern = new RegExp(`^${version.replace(/\./g, '\\.')}`);
+        return [ ...Object.keys(exactHit.versions || {}), 'latest' ]
+          .reverse()
+          .filter(version => pattern.test(version))
+          .slice(0, 10)
+          .map(version => ({ title: `${name}@${version}` }));
+      })
+      .catch(error => []);
   }
 }
 
@@ -160,4 +189,4 @@ export const validation = Validation.createInvoker();
 export const packageJsonValidation = PackageJsonValidation.createInvoker();
 export const packageInfo = Package.createInvoker();
 export const complete = Complete.createInvoker();
-export const getVersions = GetPackageVersions.createInvoker();
+export const getSuggestions = GetSuggestions.createInvoker();
