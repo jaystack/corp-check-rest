@@ -26,7 +26,7 @@ export class PackageVersionNotExists extends Error {
 export class GetPackageInfo extends Service {
   public async handle(@param name, @param version = LATEST_VERSION) {
     const info: any = await request({
-      uri: `https://registry.npmjs.org/${name}`,
+      uri: `https://registry.npmjs.org/${name.replace('/', '%2F')}`,
       json: true
     });
 
