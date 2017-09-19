@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es6",
     "outDir": "lib",
+    "lib": [ "esnext" ],
     "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
@@ -9,8 +10,5 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true
   },
-  "exclude": [
-    "node_modules",
-    "lib"
-  ]
+  "exclude": [ "node_modules", "lib" ]
 }

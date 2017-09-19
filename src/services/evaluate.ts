@@ -1,20 +1,6 @@
-import { Service, param, injectable, InjectionScope } from 'functionly';
-
-export type Evaluation = {
-  score: number;
-  description: string;
-  meta: any; // meta for custom data visualization
-};
-
-export type Evaluator = ({ data }) => Promise<Evaluation>;
-
-export type Qualification = 'RECOMMENDED' | 'ACCEPTED' | 'REJECTED';
-
-export type FinalEvaluation = {
-  evaluations: Evaluation[];
-  finalScore: number;
-  qualification: Qualification;
-};
+import { Service, param, injectable, InjectionScope, inject } from 'functionly';
+import { Info as Data, RuleSet, Qualification, Evaluator, Evaluation, FinalEvaluation } from '../types';
+import License from '../evaluators/License';
 
 const qualificate = (finalScore: number): Qualification => {
   if (finalScore >= 0.8) return 'RECOMMENDED';
@@ -24,9 +10,12 @@ const qualificate = (finalScore: number): Qualification => {
 
 @injectable(InjectionScope.Singleton)
 export class Evaluate extends Service {
-  public async handle(@param data, @param cid) {
-    const evaluators: Evaluator[] = []; // evaulators are injectable services
-    const evaluations: Evaluation[] = await Promise.all(evaluators.map(evaluator => evaluator({ data })));
+  public async handle(@param data, @param ruleSet, @inject(License) license) {
+    const evaluators: Evaluator[] = [ license ]; // evaulators are injectable services
+    const rules = [ ruleSet.license ];
+    const evaluations: Evaluation[] = await Promise.all(
+      evaluators.map((evaluator, i) => evaluator({ data, rule: rules[i] }))
+    );
     const finalScore = evaluations.reduce((final, { score }) => final * score, 1);
     return {
       evaluations,
