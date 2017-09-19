@@ -29,7 +29,7 @@ export class License extends Service {
     const errors = reduceTree<Error[], { rule: LicenseRule }>(data.tree, treeReducer, [], { rule });
     return {
       name: 'License check',
-      description: errors.length > 0 ? 'Invalid licenses found' : 'Every license are valid',
+      description: errors.length > 0 ? 'Invalid licenses found' : 'Every license is valid',
       score: errors.length > 0 ? 0 : 1,
       meta: errors
     };
