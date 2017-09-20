@@ -10,14 +10,11 @@ export type Error = {
   type: ErrorType;
 };
 
-const treeReducer = (
+const treeReducer = ({ include, exclude, licenseRequired }: LicenseRule) => (
   acc: Error[],
   pkg: Package,
-  path: string[],
-  { rule: { include, exclude, licenseRequired, depth } }: { rule: LicenseRule }
+  path: string[]
 ) => {
-  if (typeof depth === 'number' && path.length > depth + 1) return acc;
-
   if (licenseRequired && !pkg.license.type)
     return [ ...acc, { path, licenseType: pkg.license.type, type: 'NOTDEFINED' as ErrorType } ];
 
@@ -37,7 +34,8 @@ const treeReducer = (
 @injectable(InjectionScope.Singleton)
 export default class License extends Service {
   public async handle(@param data: Data, @param rule: LicenseRule): Promise<Evaluation> {
-    const errors = reduceTree<Error[], { rule: LicenseRule }>(data.tree, treeReducer, [], { rule });
+    const depth = typeof rule.depth === 'number' ? rule.depth : Infinity;
+    const errors = reduceTree<Error[]>(data.tree, treeReducer(rule), [], depth);
     return {
       name: 'License check',
       description: errors.length > 0 ? 'Invalid licenses found' : 'Every license is valid',
