@@ -2,12 +2,12 @@ export type LicenseRule = {
   include?: string[];
   exclude?: string[];
   licenseRequired?: boolean;
-  deepness?: number;
+  depth?: number;
 };
 
 export type VersionRule = {
   minVersion: string;
-  deepness?: number;
+  depth?: number;
 };
 
 export type RuleSet = {

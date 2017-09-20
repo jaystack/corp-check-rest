@@ -14,16 +14,15 @@ const treeReducer = (
   acc: Error[],
   pkg: Package,
   path: string[],
-  depth: number,
-  { rule: { include, exclude, licenseRequired, deepness } }: { rule: LicenseRule }
+  { rule: { include, exclude, licenseRequired, depth } }: { rule: LicenseRule }
 ) => {
-  if (typeof deepness === 'number' && depth > deepness) return [ ...acc ];
+  if (typeof depth === 'number' && path.length > depth + 1) return acc;
 
   if (licenseRequired && !pkg.license.type)
     return [ ...acc, { path, licenseType: pkg.license.type, type: 'NOTDEFINED' as ErrorType } ];
 
   if (!licenseRequired && !pkg.license.type) {
-    return [ ...acc ];
+    return acc;
   }
 
   if (exclude && exclude.includes(pkg.license.type))
@@ -32,7 +31,7 @@ const treeReducer = (
   if (include && !include.includes(pkg.license.type))
     return [ ...acc, { path, licenseType: pkg.license.type, type: 'MISSING' as ErrorType } ];
 
-  return [ ...acc ];
+  return acc;
 };
 
 @injectable(InjectionScope.Singleton)

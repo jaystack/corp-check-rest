@@ -11,12 +11,11 @@ const treeReducer = (
   acc: Error[],
   pkg: Package,
   path: string[],
-  depth: number,
-  { rule: { minVersion, deepness } }: { rule: VersionRule }
+  { rule: { minVersion, depth } }: { rule: VersionRule }
 ) => {
-  if (typeof deepness === 'number' && depth > deepness) return [ ...acc ];
+  if (typeof depth === 'number' && path.length > depth + 1) return acc;
   if (minVersion && pkg.version < minVersion) return [ ...acc, { path, version: pkg.version, depth } ];
-  return [ ...acc ];
+  return acc;
 };
 
 @injectable(InjectionScope.Singleton)

@@ -5,11 +5,11 @@ export const DEFAULT_CORP_RULE_SET: RuleSet = {
   license: {
     exclude: [ 'GPLv2' ],
     licenseRequired: true,
-    deepness: undefined
+    depth: null
   },
   version: {
     minVersion: '1.0.0',
-    deepness: undefined
+    depth: null
   }
 };
 
