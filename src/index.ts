@@ -142,7 +142,7 @@ export class Complete extends CorpCheckRestService {
 }
 
 @rest({ path: '/suggestions', methods: [ 'get' ], anonymous: true, cors: true })
-export class GetSuggestions extends CorpCheckRestService {
+export class Suggestion extends CorpCheckRestService {
   public async handle(@param name, @param version): Promise<{ title: string; description?: string }[]> {
     if (!name) return [];
     if (version === undefined) {
@@ -168,4 +168,4 @@ export const validation = Validation.createInvoker();
 export const packageJsonValidation = PackageJsonValidation.createInvoker();
 export const packageInfo = Package.createInvoker();
 export const complete = Complete.createInvoker();
-export const getSuggestions = GetSuggestions.createInvoker();
+export const getSuggestions = Suggestion.createInvoker();
