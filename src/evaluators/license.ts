@@ -11,9 +11,9 @@ export type Error = {
 };
 
 const treeReducer = (
+  acc: Error[],
   pkg: Package,
   path: string[],
-  acc: Error[],
   { rule: { include, exclude } }: { rule: LicenseRule }
 ) => {
   if (include && !include.includes(pkg.license.type))
