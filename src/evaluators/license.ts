@@ -24,7 +24,7 @@ const treeReducer = (
 };
 
 @injectable(InjectionScope.Singleton)
-export class License extends Service {
+export default class License extends Service {
   public async handle(@param data: Data, @param rule: LicenseRule): Promise<Evaluation> {
     const errors = reduceTree<Error[], { rule: LicenseRule }>(data.tree, treeReducer, [], { rule });
     return {
