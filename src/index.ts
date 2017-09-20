@@ -6,6 +6,7 @@ import request = require('request-promise-native');
 import { ErrorTransform } from './middleware/errorTransform';
 import { GetPackageInfo } from './services/npm';
 import { Evaluate } from './services/evaluate';
+import { GetRuleSet } from './services/defaultRuleSet';
 import {
   GetPackageResult,
   UpdatePackageResult,
@@ -84,7 +85,8 @@ export class Package extends CorpCheckRestService {
     @inject(GetPackageInfo) getPackageInfo,
     @inject(GetPackageResult) getPackageResult,
     @inject(IsExpiredResult) isExpiredResult,
-    @inject(Evaluate) evaluate
+    @inject(Evaluate) evaluate,
+    @inject(GetRuleSet) getRuleSet
   ) {
     if (name && !version) {
       const packageInfo = await getPackageInfo({ name });
@@ -104,7 +106,10 @@ export class Package extends CorpCheckRestService {
 
     let result = {};
     if (item && item.validationData && item.validationState.state === 'SUCCEEDED') {
-      result = await evaluate({ data: JSON.parse(item.validationData) });
+      result = await evaluate({
+        data: JSON.parse(item.validationData),
+        ruleSet: await getRuleSet({ ruleSet: item.ruleSet })
+      });
     }
 
     return {

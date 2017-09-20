@@ -2,7 +2,7 @@ import { Service, param, injectable, InjectionScope } from 'functionly';
 import { Info as Data, LicenseRule, Package, Evaluation } from '../types';
 import reduceTree from '../utils/reduceTree';
 
-export type ErrorType = 'MISSING' | 'CONTAINS';
+export type ErrorType = 'MISSING' | 'CONTAINS' | 'NOTDEFINED';
 
 export type Error = {
   path: string[];
@@ -14,12 +14,24 @@ const treeReducer = (
   acc: Error[],
   pkg: Package,
   path: string[],
-  { rule: { include, exclude } }: { rule: LicenseRule }
+  depth: number,
+  { rule: { include, exclude, licenseRequired, deepness } }: { rule: LicenseRule }
 ) => {
-  if (include && !include.includes(pkg.license.type))
-    return [ ...acc, { path, licenseType: pkg.license.type, type: 'MISSING' as ErrorType } ];
+  if (typeof deepness === 'number' && depth > deepness) return [ ...acc ];
+
+  if (licenseRequired && !pkg.license.type)
+    return [ ...acc, { path, licenseType: pkg.license.type, type: 'NOTDEFINED' as ErrorType } ];
+
+  if (!licenseRequired && !pkg.license.type) {
+    return [ ...acc ];
+  }
+
   if (exclude && exclude.includes(pkg.license.type))
     return [ ...acc, { path, licenseType: pkg.license.type, type: 'CONTAINS' as ErrorType } ];
+
+  if (include && !include.includes(pkg.license.type))
+    return [ ...acc, { path, licenseType: pkg.license.type, type: 'MISSING' as ErrorType } ];
+
   return [ ...acc ];
 };
 

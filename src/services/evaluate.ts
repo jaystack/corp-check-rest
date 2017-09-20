@@ -1,6 +1,7 @@
 import { Service, param, injectable, InjectionScope, inject } from 'functionly';
 import { Info as Data, RuleSet, Qualification, Evaluator, Evaluation, FinalEvaluation } from '../types';
-import License from '../evaluators/License';
+import License from '../evaluators/license';
+import Version from '../evaluators/version';
 
 const qualificate = (finalScore: number): Qualification => {
   if (finalScore >= 0.8) return 'RECOMMENDED';
@@ -10,9 +11,9 @@ const qualificate = (finalScore: number): Qualification => {
 
 @injectable(InjectionScope.Singleton)
 export class Evaluate extends Service {
-  public async handle(@param data, @param ruleSet, @inject(License) license) {
-    const evaluators: Evaluator[] = [ license ]; // evaulators are injectable services
-    const rules = [ ruleSet.license ];
+  public async handle(@param data, @param ruleSet, @inject(License) license, @inject(Version) version) {
+    const evaluators: Evaluator[] = [ license, version ]; // evaulators are injectable services
+    const rules = [ ruleSet.license, ruleSet.version ];
     const evaluations: Evaluation[] = await Promise.all(
       evaluators.map((evaluator, i) => evaluator({ data, rule: rules[i] }))
     );

@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "start": "npm run build && cross-env MONGOLOCALURL=mongod://localhost:27017/corp-check node_modules/.bin/functionly local",
+    "start": "npm run build && cross-env MONGOLOCALURL=mongodb://localhost:27017/corp-check node_modules/.bin/functionly local",
     "start:f": "cross-env MONGOLOCALURL=mongodb://localhost:27017/corp-check node_modules/.bin/functionly local",
     "build": "node_modules/.bin/tsc",
     "build:watch": "node_modules/.bin/tsc -w",
