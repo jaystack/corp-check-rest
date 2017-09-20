@@ -2,6 +2,7 @@ import { generate } from 'shortid';
 import { FunctionalService, DynamoTable, Service, Api, NoCallbackWaitsForEmptyEventLoop } from 'functionly';
 import { rest, aws, param, inject, use } from 'functionly';
 import { stringify } from 'querystring';
+import request = require('request-promise-native');
 import { ErrorTransform } from './middleware/errorTransform';
 import { GetPackageInfo } from './services/npm';
 import { Evaluate } from './services/evaluate';
@@ -12,7 +13,6 @@ import {
   StartPackageValidation,
   IsExpiredResult
 } from './services/checker';
-import request = require('request-promise-native');
 
 @aws({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
 @use(NoCallbackWaitsForEmptyEventLoop)
@@ -145,43 +145,22 @@ export class Complete extends CorpCheckRestService {
 export class GetSuggestions extends CorpCheckRestService {
   public async handle(@param name, @param version): Promise<{ title: string; description?: string }[]> {
     if (!name) return [];
-    return await request
-      .post(
-        'https://ofcncog2cu-dsn.algolia.net/1/indexes/*/queries?x-algolia-application-id=OFCNCOG2CU&x-algolia-api-key=f54e21fa3a2a0160595bb058179bfb1e',
-        {
-          json: true,
-          body: {
-            requests: [
-              {
-                indexName: 'npm-search',
-                params: stringify({
-                  query: name,
-                  optionalFacetFilters: `concatenatedName:${name}`,
-                  hitsPerPage: '5',
-                  maxValuesPerFacet: '10',
-                  page: '0',
-                  attributesToRetrieve: '["name","description","versions"]',
-                  facets: '["keywords","keywords"]',
-                  tagFilters: ''
-                })
-              }
-            ]
-          }
-        }
-      )
-      .then(json => {
-        const hits = json.results[0].hits;
-        if (version === undefined) return hits.map(({ name, description }) => ({ title: name, description }));
-        const exactHit = hits.find(({ name: n }) => n === name);
-        if (!exactHit) return [];
-        const pattern = new RegExp(`^${version.replace(/\./g, '\\.')}`);
-        return [ ...Object.keys(exactHit.versions || {}), 'latest' ]
-          .reverse()
-          .filter(version => pattern.test(version))
-          .slice(0, 10)
-          .map(version => ({ title: `${name}@${version}` }));
-      })
-      .catch(error => []);
+    if (version === undefined) {
+      const { objects } = await request
+        .get(`https://registry.npmjs.org/-/v1/search?${stringify({ text: name, size: 5 })}`, {
+          json: true
+        })
+        .catch(err => ({ objects: [] }));
+      return objects.map(({ package: { name, description } }) => ({ title: name, description }));
+    } else {
+      const { versions } = await request.get(`https://registry.npmjs.org/${name}`, { json: true });
+      const pattern = new RegExp(`^${version.replace(/\./g, '\\.')}`);
+      return [ ...Object.keys(versions || {}) ]
+        .reverse()
+        .filter(version => pattern.test(version))
+        .slice(0, 10)
+        .map(version => ({ title: `${name}@${version}` }));
+    }
   }
 }
 
