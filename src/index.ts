@@ -1,148 +1,135 @@
-import { generate } from 'shortid';
 import { FunctionalService, DynamoTable, Service, Api, NoCallbackWaitsForEmptyEventLoop } from 'functionly';
 import { rest, aws, param, inject, use } from 'functionly';
 import { stringify } from 'querystring';
 import request = require('request-promise-native');
 import { ErrorTransform } from './middleware/errorTransform';
-import { GetPackageInfo } from './services/npm';
-import { Evaluate } from './services/evaluate';
-import { GetRuleSet } from './services/defaultRuleSet';
-import {
-  GetPackageResult,
-  UpdatePackageResult,
-  CreatePackageResult,
-  StartPackageValidation,
-  IsExpiredResult
-} from './services/checker';
+import { GetNpmInfo } from './services/npm';
+import { StartPackageValidation, IsExpiredResult } from './services/checker';
+
+import { PackageInfoApi } from './api/packageInfo';
+import { EvaluationsApi } from './api/evaluations';
+import { PackageInfo } from './types';
 
 @aws({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
 @use(NoCallbackWaitsForEmptyEventLoop)
 @use(ErrorTransform)
 export class CorpCheckRestService extends FunctionalService {}
 
-@rest({ path: '/validation', methods: [ 'get' ], anonymous: true, cors: true })
-export class Validation extends CorpCheckRestService {
-  public async handle(
-    @param name,
-    @param version,
-    @param force,
-    @inject(GetPackageInfo) getPackageInfo,
-    @inject(GetPackageResult) getPackageResult,
-    @inject(CreatePackageResult) createPackageResult,
-    @inject(StartPackageValidation) startPackageValidation,
-    @inject(IsExpiredResult) isExpiredResult
-  ) {
-    const packageInfo = await getPackageInfo({ name, version });
-    let item = await getPackageResult({ name: packageInfo.name, version: packageInfo.version, isProduction: true });
-
-    if (item && (await isExpiredResult({ item, update: true, force: typeof force !== 'undefined' }))) {
-      item = null;
-    }
-
-    if (item === null) {
-      item = await createPackageResult({
-        name: packageInfo.name,
-        version: packageInfo.version,
-        isNpmPackage: true,
-        isProduction: true,
-        packageJSON: packageInfo.packageJSON
-      });
-
-      await startPackageValidation({ packageJSON: item.packageJSON, cid: item._id, isProduction: true });
-    }
-
-    return { item, cid: item._id };
-  }
-}
+export class MissingPackageParameters extends Error {}
 
 @rest({ path: '/validation', methods: [ 'post' ], anonymous: true, cors: true })
-export class PackageJsonValidation extends CorpCheckRestService {
+export class Validation extends CorpCheckRestService {
   public async handle(
+    @param packageName,
+    @param force,
     @param packageJSON,
     @param isProduction,
-    @inject(CreatePackageResult) createPackageResult,
+    @param ruleSet,
+    @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
+    @inject(EvaluationsApi) evaluationsApi: EvaluationsApi,
+    @inject(IsExpiredResult) isExpiredResult,
     @inject(StartPackageValidation) startPackageValidation
   ) {
     const isProd = typeof isProduction !== 'undefined';
-    const item = await createPackageResult({
-      isNpmPackage: false,
-      isProduction: isProd,
-      packageJSON
-    });
+    let packageInfo: PackageInfo;
+    if (packageJSON) {
+      packageInfo = await packageInfoApi.fromPackageJSON({ packageJSON, isProduction: isProd });
+    } else if (packageName) {
+      packageInfo = await packageInfoApi.fromPackageName({ packageName });
+    } else {
+      throw new MissingPackageParameters('packageJSON or packageName');
+    }
 
-    await startPackageValidation({ packageJSON: item.packageJSON, cid: item._id, isProduction: isProd });
+    if (await isExpiredResult({ packageInfo, update: true, force: typeof force !== 'undefined' })) {
+      packageInfo = await packageInfoApi.create(packageInfo);
+    }
 
-    return { item, cid: item._id };
+    const packageInfoId = packageInfo._id;
+    let evaluationInfo = await evaluationsApi.fromRuleSet({ packageInfoId, ruleSet });
+    if (!evaluationInfo) {
+      evaluationInfo = await evaluationsApi.create({ packageInfoId, ruleSet });
+
+      if (packageInfo.state.type === 'PENDING') {
+        await startPackageValidation({
+          packageName: packageInfo.packageName,
+          packageJSON: packageInfo.packageJSON,
+          cid: evaluationInfo._id,
+          isProduction: packageInfo.isProduction
+        });
+      }
+    }
+
+    if (packageInfo.state.type === 'SUCCEEDED') {
+      await evaluationsApi.evaluate({
+        evaluationInfo,
+        data: packageInfo.meta
+      });
+    }
+
+    return { state: packageInfo.state, cid: evaluationInfo._id };
   }
 }
 
 @rest({ path: '/package', methods: [ 'get' ], anonymous: true, cors: true })
 export class Package extends CorpCheckRestService {
   public async handle(
-    @param name,
-    @param version,
     @param cid,
-    @inject(GetPackageInfo) getPackageInfo,
-    @inject(GetPackageResult) getPackageResult,
-    @inject(IsExpiredResult) isExpiredResult,
-    @inject(Evaluate) evaluate,
-    @inject(GetRuleSet) getRuleSet
+    @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
+    @inject(EvaluationsApi) evaluationsApi: EvaluationsApi,
+    @inject(IsExpiredResult) isExpiredResult
   ) {
-    if (name && !version) {
-      const packageInfo = await getPackageInfo({ name });
-      version = packageInfo.version;
-    }
-
-    const item = await getPackageResult({ name, version, cid, isProduction: true });
-    let expired = false;
-
-    if (name && version) {
-      if (item && (await isExpiredResult({ item, update: false, force: false }))) {
-        expired = true;
-      }
-    } else {
-      expired = undefined;
-    }
-
-    let result = {};
-    if (item && item.validationData && item.validationState.state === 'SUCCEEDED') {
-      result = await evaluate({
-        data: JSON.parse(item.validationData),
-        ruleSet: await getRuleSet({ ruleSet: item.ruleSet })
-      });
-    }
-
-    return {
-      package: packageInfo,
-      item,
-      name,
-      version,
-      cid: item && item._id,
-      expired,
-      result
+    const result = {
+      cid,
+      name: undefined,
+      state: { type: 'NOTEXISTS', date: Date.now() },
+      expired: true,
+      result: null,
+      ruleSet: null
     };
+
+    const evaluationInfo = await evaluationsApi.get({ cid });
+    if (evaluationInfo) {
+      result.result = evaluationInfo.result;
+      result.ruleSet = evaluationInfo.ruleSet;
+
+      const packageInfo = await packageInfoApi.getById({ _id: evaluationInfo.packageInfoId });
+      if (packageInfo) {
+        result.name = packageInfo.packageName || `${packageInfo.packageJSON.name}@${packageInfo.date.toISOString()}`;
+        result.state = <any>packageInfo.state;
+        result.expired = await isExpiredResult({ packageInfo, update: false, force: false });
+      }
+    }
+
+    return result;
   }
 }
 
 //TODO remove
 @rest({ path: '/complete', methods: [ 'post' ] })
 export class Complete extends CorpCheckRestService {
-  public async handle(@param cid, @param data, @param error, @inject(UpdatePackageResult) updatePackageResult) {
+  public async handle(
+    @param cid,
+    @param data,
+    @param error,
+    @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
+    @inject(EvaluationsApi) evaluationsApi: EvaluationsApi
+  ) {
+    const evaluationInfo = await evaluationsApi.get({ cid });
+    if (!evaluationInfo) return;
+
     if (error) {
-      await updatePackageResult({
-        cid,
-        result: JSON.stringify(error),
-        state: 'FAILED'
+      await packageInfoApi.updateState({
+        _id: evaluationInfo.packageInfoId,
+        meta: error,
+        type: 'FAILED'
       });
-    } else {
-      await updatePackageResult({
-        cid,
-        data: JSON.stringify(data),
-        state: 'SUCCEEDED'
-      });
+      return;
     }
 
-    return { ok: 1 };
+    await evaluationsApi.evaluate({
+      evaluationInfo,
+      data
+    });
   }
 }
 
@@ -170,7 +157,6 @@ export class Suggestion extends CorpCheckRestService {
 }
 
 export const validation = Validation.createInvoker();
-export const packageJsonValidation = PackageJsonValidation.createInvoker();
 export const packageInfo = Package.createInvoker();
 export const complete = Complete.createInvoker();
 export const getSuggestions = Suggestion.createInvoker();

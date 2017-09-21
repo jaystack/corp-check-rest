@@ -23,7 +23,7 @@ export class PackageVersionNotExists extends Error {
 }
 
 @injectable(InjectionScope.Singleton)
-export class GetPackageInfo extends Service {
+export class GetNpmInfo extends Service {
   public async handle(@param name, @param version = LATEST_VERSION) {
     const info: any = await request({
       uri: `https://registry.npmjs.org/${name.replace('/', '%2F')}`,
@@ -44,6 +44,6 @@ export class GetPackageInfo extends Service {
       throw new PackageVersionNotExists(name, version);
     }
 
-    return { name, version, latestVersion, packageJSON: info.versions[version], raw: info };
+    return { name, version, latestVersion, versionJSON: info.versions[version], raw: info };
   }
 }

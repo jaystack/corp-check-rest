@@ -15,7 +15,7 @@ export class Evaluate extends Service {
     const evaluators: Evaluator[] = [ license, version ]; // evaulators are injectable services
     const rules = [ ruleSet.license, ruleSet.version ];
     const evaluations: Evaluation[] = await Promise.all(
-      evaluators.map((evaluator, i) => evaluator({ data, rule: rules[i] }))
+      evaluators.map((evaluator, i) => evaluator({ data, rule: rules[i] || {} }))
     );
     const finalScore = evaluations.reduce((final, { score }) => final * score, 1);
     return {
