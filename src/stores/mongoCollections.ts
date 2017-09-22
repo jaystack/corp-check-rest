@@ -12,3 +12,8 @@ export class PackageInfoCollection extends MongoCollection {}
 @mongoConnection(mongoUrl)
 @mongoCollection({ collectionName: '%ClassName%_corp_check' })
 export class Evaluations extends MongoCollection {}
+
+@injectable()
+@mongoConnection(mongoUrl)
+@mongoCollection({ collectionName: '%ClassName%_corp_check' })
+export class ModuleMetadataCache extends MongoCollection {}

@@ -4,3 +4,4 @@ export * from './eval';
 
 export * from './evaluationInfo';
 export * from './packageInfo';
+export * from './moduleMetadata';

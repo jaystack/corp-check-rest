@@ -4,9 +4,9 @@ export type PackageInfo = {
   packageName?: string;
   packageJSON?: any;
   isProduction: boolean;
-  date: Date;
+  date: number;
   state: {
-    date: Date;
+    date: number;
     type: 'PENDING' | 'SUCCEEDED' | 'FAILED';
   };
   latest: Boolean;
