@@ -65,15 +65,24 @@ export class EvaluationsApi extends Api {
       ruleSet: await this.getRuleSet({ ruleSet: evaluationInfo.ruleSet })
     });
 
-    await this.updateResult({
-      cid: evaluationInfo._id,
-      result
-    });
+    try {
+      await this.packageInfoApi.updateState({
+        _id: evaluationInfo.packageInfoId,
+        meta: data,
+        type: 'SUCCEEDED'
+      });
 
-    await this.packageInfoApi.updateState({
-      _id: evaluationInfo.packageInfoId,
-      meta: data,
-      type: 'SUCCEEDED'
-    });
+      await this.updateResult({
+        cid: evaluationInfo._id,
+        result
+      });
+    } catch (e) {
+      await this.packageInfoApi.updateState({
+        _id: evaluationInfo.packageInfoId,
+        meta: { message: 'error in evaluate' },
+        type: 'FAILED'
+      });
+      throw e;
+    }
   }
 }
