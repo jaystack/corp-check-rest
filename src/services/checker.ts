@@ -55,7 +55,7 @@ export class IsExpiredResult extends Service {
 @environment('TASKOPTION_COMPLETELAMBDAREGION', '')
 @environment('FUNCTIONAL_SERVICE_COMPLETE', 'Complete')
 export class StartPackageValidation extends Service {
-  public async handle(@param cid, @param packageJSON, @param isProduction) {
+  public async handle(@param cid, @param packageName, @param packageJSON, @param isProduction) {
     const cluster = process.env.TASKOPTION_CLUSTER || 'checkers';
     const taskDefinition = process.env.TASKOPTION_TASKDEFINITION || 'check';
     const taskName = process.env.TASKOPTION_TASKNAME || 'checker';
@@ -72,7 +72,7 @@ export class StartPackageValidation extends Service {
             containerOverrides: [
               {
                 name: taskName,
-                command: [ 'node', '.', cid, packageJSON ],
+                command: [ 'node', '.', cid, packageName || packageJSON ],
                 environment: [
                   { name: 'NODE_ENV', value: isProduction ? 'production' : 'dev' },
                   { name: 'REGION', value: region },
