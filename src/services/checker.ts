@@ -31,8 +31,8 @@ export class IsExpiredResult extends Service {
       (packageInfo.state.type === 'SUCCEEDED' && hours > successMaxHours)
     ) {
       if (force || update) {
-        await packageInfoCollection.updateOne(
-          { _id: packageInfo._id },
+        await packageInfoCollection.updateMany(
+          { hash: packageInfo.hash },
           {
             $set: {
               latest: false

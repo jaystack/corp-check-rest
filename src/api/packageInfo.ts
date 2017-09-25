@@ -18,6 +18,7 @@ export class PackageInfoApi extends Api {
   public async fromPackageJSON({ packageJSON, isProduction }: { packageJSON: Object; isProduction: boolean }) {
     const hash = getHash(isProduction.toString() + JSON.stringify(packageJSON));
 
+    let created = false;
     let info = await this.get({ hash });
     if (!info) {
       info = await this.create({
@@ -25,9 +26,10 @@ export class PackageInfoApi extends Api {
         packageJSON,
         isProduction: true
       });
+      created = true;
     }
 
-    return info;
+    return { packageInfo: info, created };
   }
 
   public async fromPackageName({ packageName }: { packageName: string }) {
@@ -36,6 +38,7 @@ export class PackageInfoApi extends Api {
     const packageInfo = await this.getNPMInfo({ name, version });
     const hash = getHash(`${packageInfo.name}@${packageInfo.version}`);
 
+    let created = false;
     let info = await this.get({ hash });
     if (!info) {
       info = await this.create({
@@ -43,13 +46,14 @@ export class PackageInfoApi extends Api {
         packageName: `${packageInfo.name}@${packageInfo.version}`,
         isProduction: true
       });
+      created = true;
     }
 
-    return info;
+    return { packageInfo: info, created };
   }
 
   public async get({ hash }) {
-    return await this.packageInfoCollection.findOne<PackageInfo>({ hash });
+    return await this.packageInfoCollection.findOne<PackageInfo>({ hash, latest: true });
   }
 
   public async getById({ _id }) {

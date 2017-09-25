@@ -25,16 +25,17 @@ export class Validation extends CorpCheckRestService {
     @inject(StartPackageValidation) startPackageValidation
   ) {
     const isProd = typeof isProduction !== 'undefined';
-    let packageInfo: PackageInfo;
+    let data: { packageInfo: PackageInfo; created: boolean };
     if (packageJSON) {
-      packageInfo = await packageInfoApi.fromPackageJSON({ packageJSON, isProduction: isProd });
+      data = await packageInfoApi.fromPackageJSON({ packageJSON, isProduction: isProd });
     } else if (packageName) {
-      packageInfo = await packageInfoApi.fromPackageName({ packageName });
+      data = await packageInfoApi.fromPackageName({ packageName });
     } else {
       throw new MissingPackageParameters('packageJSON or packageName');
     }
+    let { packageInfo, created } = data;
 
-    if (await isExpiredResult({ packageInfo, update: true, force: typeof force !== 'undefined' })) {
+    if (await isExpiredResult({ packageInfo, update: true, force: !created && typeof force !== 'undefined' })) {
       packageInfo = await packageInfoApi.create(packageInfo);
     }
 
