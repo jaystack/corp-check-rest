@@ -1,59 +1,51 @@
 import { Service, param, injectable, InjectionScope } from 'functionly';
-import { Info as Data, LicenseRule, Package, Evaluation, Log } from '../types';
-import reduceTree from '../utils/reduceTree';
+import { Node, LicenseRule, PackageMeta, Evaluation, Log } from '../types';
 
-const treeReducer = ({ include, exclude, licenseRequired }: LicenseRule) => (
-  acc: Log[],
-  pkg: Package,
-  path: string[]
-) => {
-  if (licenseRequired && !pkg.license.type)
+const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule): Log[] => {
+  if (licenseRequired && !node.license.type)
     return [
-      ...acc,
       {
-        message: `${pkg.name} missing license`,
+        message: `${node.name} missing license`,
         type: 'ERROR',
-        meta: { path, licenseType: pkg.license.type, type: 'NOTDEFINED' }
+        meta: { licenseType: node.license.type, type: 'NOTDEFINED' }
       } as Log
     ];
 
-  if (!licenseRequired && !pkg.license.type) {
-    return acc;
+  if (!licenseRequired && !node.license.type) {
+    return [];
   }
 
-  if (exclude && exclude.includes(pkg.license.type))
+  if (exclude && exclude.includes(node.license.type))
     return [
-      ...acc,
       {
-        message: `${pkg.name} has excluded license`,
+        message: `${node.name} has excluded license`,
         type: 'ERROR',
-        meta: { path, licenseType: pkg.license.type, type: 'CONTAINS' }
+        meta: { licenseType: node.license.type, type: 'CONTAINS' }
       } as Log
     ];
 
-  if (include && !include.includes(pkg.license.type))
+  if (include && !include.includes(node.license.type))
     return [
-      ...acc,
       {
-        message: `${pkg.name} license is not allowed`,
+        message: `${node.name} license is not allowed`,
         type: 'ERROR',
-        meta: { path, licenseType: pkg.license.type, type: 'MISSING' }
+        meta: { licenseType: node.license.type, type: 'MISSING' }
       } as Log
     ];
 
-  return acc;
+  return [];
 };
 
 @injectable(InjectionScope.Singleton)
 export default class License extends Service {
-  public async handle(@param data: Data, @param rule: LicenseRule): Promise<Evaluation> {
+  public async handle(@param node: Node, @param rule: LicenseRule): Promise<Evaluation> {
     const depth = typeof rule.depth === 'number' ? rule.depth : Infinity;
-    const logs = reduceTree<Log[]>(data.tree, treeReducer(rule), [], depth);
+    const logs = getLogs(node, rule);
     return {
-      name: 'License check',
+      name: 'license',
       description: logs.length > 0 ? 'Invalid licenses found' : 'Every license is valid',
       score: logs.length > 0 ? 0 : 1,
       logs
-    };
+    } as Evaluation;
   }
 }

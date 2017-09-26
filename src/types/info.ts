@@ -1,14 +1,24 @@
+export type PackageSignature = {
+  signature?: string;
+  fullName?: string;
+  rawScope?: string;
+  scope?: string;
+  name?: string;
+  rawVersion?: string;
+  version?: string;
+};
+
 export type License = {
   type: string;
   hasLicenseFile: boolean;
   isPrivate: boolean;
 };
 
-export type Package = {
+export type Node = {
   name: string;
   version: string;
   license: License;
-  dependencies: Package[];
+  dependencies: Node[];
 };
 
 export type Point<T> = {
@@ -18,19 +28,48 @@ export type Point<T> = {
 
 export type TimeSeries<T> = Point<T>[];
 
-export type PackageMeta = {
-  stars: number;
-  contributors: number;
-  forks: number;
-
-  downloads: TimeSeries<number>;
-  releases: TimeSeries<string>;
-  issues: TimeSeries<number>;
-  commits: TimeSeries<number>;
-
-  dependents: string[];
-  ignoring: boolean;
+export type Distribution = {
+  [interval: string]: number;
 };
+
+export type Stats = {
+  count: number;
+  openCount: number;
+  distribution: Distribution;
+};
+
+export type Repository = {
+  type: string;
+  url: string;
+};
+
+export type GithubData = {
+  starsCount: number;
+  forksCount: number;
+  subscribersCount: number;
+  commitFrequency: TimeSeries<number>;
+  codeFrequency: TimeSeries<number>;
+  issues: Stats;
+  pullRequests: Stats;
+};
+
+export type DistTag = {
+  version: string;
+  tag: string;
+};
+
+export type NpmData = {
+  distTags: DistTag[];
+  releases: TimeSeries<string>;
+  maintainersCount: number;
+  repository: Repository;
+};
+
+export type PackageMeta = GithubData &
+  NpmData & {
+    dependendtsCount: number;
+    downloadFrequency: TimeSeries<number>;
+  };
 
 export type Meta = {
   [packageName: string]: PackageMeta;
@@ -39,7 +78,7 @@ export type Meta = {
 export type Error = { error: string };
 
 export type Info = {
-  tree: Package;
+  tree: Node;
   meta: Meta;
 };
 

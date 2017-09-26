@@ -1,4 +1,4 @@
-import { Info as Data } from './info';
+import { Node, PackageMeta } from './info';
 
 export type Log = {
   message: string;
@@ -13,12 +13,21 @@ export type Evaluation = {
   logs: Log[];
 };
 
-export type Evaluator = ({ data, rule }: { data: Data; rule: any }) => Promise<Evaluation>;
+//export type Evaluator = ({ data, rule }: { data: Data; rule: any }) => Promise<Evaluation>;
+export type Evaluator = (
+  { node, packageMeta, rule }: { node: Node; packageMeta: PackageMeta; rule: any }
+) => Promise<Evaluation>;
 
 export type Qualification = 'RECOMMENDED' | 'ACCEPTED' | 'REJECTED';
 
-export type FinalEvaluation = {
+export type NodeEvaluation = {
+  nodeName: string;
   evaluations: Evaluation[];
-  finalScore: number;
+  nodeScore: number;
+  dependencies: NodeEvaluation[];
+};
+
+export type FinalEvaluation = {
+  rootEvaluation: NodeEvaluation;
   qualification: Qualification;
 };
