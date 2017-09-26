@@ -72,7 +72,7 @@ export class StartPackageValidation extends Service {
             containerOverrides: [
               {
                 name: taskName,
-                command: [ 'node', '.', cid, packageName || packageJSON ],
+                command: [ 'node', '.', cid, packageName || JSON.stringify(packageJSON) ],
                 environment: [
                   { name: 'NODE_ENV', value: isProduction ? 'production' : 'dev' },
                   { name: 'REGION', value: region },
