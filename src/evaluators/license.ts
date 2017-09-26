@@ -15,19 +15,21 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
     return [];
   }
 
-  if (exclude && exclude.includes(node.license.type))
+  const license = node.license.type.toLowerCase();
+
+  if (exclude && exclude.map(l => l.toLowerCase()).includes(license))
     return [
       {
-        message: `${node.name} has excluded license`,
+        message: `${node.name} has excluded license '${node.license.type}'`,
         type: 'ERROR',
         meta: { licenseType: node.license.type, type: 'CONTAINS' }
       } as Log
     ];
 
-  if (include && !include.includes(node.license.type))
+  if (include && !include.map(l => l.toLowerCase()).includes(license))
     return [
       {
-        message: `${node.name} license is not allowed`,
+        message: `${node.name} license is not allowed '${node.license.type}'`,
         type: 'ERROR',
         meta: { licenseType: node.license.type, type: 'MISSING' }
       } as Log
