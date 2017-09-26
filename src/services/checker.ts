@@ -1,4 +1,4 @@
-import { Service, param, injectable, inject, InjectionScope, environment, getFunctionName } from 'functionly';
+import { Service, param, injectable, inject, InjectionScope, environment, getFunctionName, stage } from 'functionly';
 import { PackageInfoCollection } from '../stores/mongoCollections';
 import { generate } from 'shortid';
 import * as moment from 'moment';
@@ -48,15 +48,15 @@ export class IsExpiredResult extends Service {
 }
 
 @injectable(InjectionScope.Singleton)
-@environment('TASKOPTION_CLUSTER', 'checkers')
+@environment('TASKOPTION_CLUSTER', '')
 @environment('TASKOPTION_TASKDEFINITION', 'check')
 @environment('TASKOPTION_TASKNAME', 'checker')
 @environment('TASKOPTION_TASKREGION', 'eu-central-1')
 @environment('TASKOPTION_COMPLETELAMBDAREGION', '')
 @environment('FUNCTIONAL_SERVICE_COMPLETE', 'Complete')
 export class StartPackageValidation extends Service {
-  public async handle(@param cid, @param packageName, @param packageJSON, @param isProduction) {
-    const cluster = process.env.TASKOPTION_CLUSTER || 'checkers';
+  public async handle(@param cid, @param packageName, @param packageJSON, @param isProduction, @stage stage) {
+    const cluster = process.env.TASKOPTION_CLUSTER || `corp-check-${stage}` ;
     const taskDefinition = process.env.TASKOPTION_TASKDEFINITION || 'check';
     const taskName = process.env.TASKOPTION_TASKNAME || 'checker';
     const region = process.env.TASKOPTION_REGION || process.env.AWS_REGION || 'eu-central-1';
