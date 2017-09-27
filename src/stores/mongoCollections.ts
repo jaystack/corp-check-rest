@@ -40,7 +40,7 @@ export const mongoConnection = (url: string, stage: string = '') =>
 
 @mongoConnection('mongodb://localhost:27017/corp-check')
 @mongoConnection(
-  'AQICAHjLPCiyfkkMKPgAeOmVYE2S22YSQdPPXzuq04fafcsrmgFxtqO4hJWgzcWRou40m2ROAAAAhzCBhAYJKoZIhvcNAQcGoHcwdQIBADBwBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDDDabW5aWG9fuj+ciQIBEIBDv3nBYNbh5qm1EBdK/xR9x5nehcFBz/TvQw4sjouGkW8jiM8cGzh71CNF8EzzwVTneWORPcsPyu7zmXrAMJsQHO48tQ==',
+  'AQICAHjLPCiyfkkMKPgAeOmVYE2S22YSQdPPXzuq04fafcsrmgFq7TETyIDlZsAsQmHvEXbyAAAAszCBsAYJKoZIhvcNAQcGoIGiMIGfAgEAMIGZBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDOxHpV4kijdqMy9YngIBEIBs/LzD9il8DcGMfAl9YU375IH8tT6ulg8I/uYVcN2nxHP4DIolcWuWANfQ+R0rQ6ALV3ZgMwBYxgYP281HEizk47nwpFTlnAFhDK8HCUantJ2/PqXmcygfHsZHQ+bvkRfLZaB/+6gG1CbL7emP',
   'dev'
 )
 @mongoConnection('mongodb://localhost:27017/corp-check', 'stage')
