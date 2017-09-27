@@ -4,7 +4,7 @@ import { CorpCheckRestService } from './corpCheckRestService';
 
 import { PackageInfoApi } from '../api/packageInfo';
 import { EvaluationsApi } from '../api/evaluations';
-import { CreateCacheItems } from './moduleMEtaCache';
+import { CreateCacheItems } from './moduleMetaCache';
 
 //TODO remove
 @rest({ path: '/complete', methods: [ 'post' ] })
