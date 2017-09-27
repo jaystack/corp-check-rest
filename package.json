@@ -22,15 +22,15 @@
   "devDependencies": {
     "@types/node": "^6.0.88",
     "cross-env": "^5.0.5",
-    "typescript": "^2.5.2"
+    "typescript": "^2.5.3"
   },
   "dependencies": {
-    "aws-sdk": "^2.113.0",
-    "functionly": "^0.0.13",
+    "aws-sdk": "^2.123.0",
+    "functionly": "0.0.13",
     "hash-sum": "^1.0.2",
     "moment": "^2.18.1",
-    "request": "^2.81.0",
-    "request-promise-native": "^1.0.4",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5",
     "shortid": "^2.2.8"
   }
 }
