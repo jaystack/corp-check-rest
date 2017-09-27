@@ -54,15 +54,17 @@ export class IsExpiredResult extends Service {
 @environment('TASKOPTION_TASKREGION', 'eu-central-1')
 @environment('TASKOPTION_COMPLETELAMBDAREGION', '')
 @environment('FUNCTIONAL_SERVICE_COMPLETE', 'Complete')
+@environment('FUNCTIONAL_SERVICE_GETMODULEMETADATA', 'GetModuleMeta')
 export class StartPackageValidation extends Service {
   public async handle(@param cid, @param packageName, @param packageJSON, @param isProduction, @stage stage) {
     const cluster = process.env.TASKOPTION_CLUSTER || `corp-check-${stage}` ;
     const taskDefinition = process.env.TASKOPTION_TASKDEFINITION || 'check';
     const taskName = process.env.TASKOPTION_TASKNAME || 'checker';
     const region = process.env.TASKOPTION_REGION || process.env.AWS_REGION || 'eu-central-1';
-    const completeLambda = process.env.TASKOPTION_COMPLETELAMBDAREGION || process.env.AWS_REGION || 'eu-central-1';
-    const resolvedFuncName = process.env.FUNCTIONAL_SERVICE_COMPLETE;
-
+    const lambdaRegion = process.env.TASKOPTION_COMPLETELAMBDAREGION || process.env.AWS_REGION || 'eu-central-1';
+    const completeLambda = process.env.FUNCTIONAL_SERVICE_COMPLETE;
+    const getmodulemetadataLambda = process.env.FUNCTIONAL_SERVICE_GETMODULEMETADATA;
+    
     return new Promise((resolve, reject) => {
       new AWS.ECS({ region }).runTask(
         {
@@ -75,8 +77,9 @@ export class StartPackageValidation extends Service {
                 command: [ 'node', '.', cid, packageName || JSON.stringify(packageJSON) ],
                 environment: [
                   { name: 'NODE_ENV', value: isProduction ? 'production' : 'dev' },
-                  { name: 'REGION', value: region },
-                  { name: 'COMPLETE_LAMBDA_NAME', value: resolvedFuncName }
+                  { name: 'REGION', value: lambdaRegion },
+                  { name: 'COMPLETE_LAMBDA_NAME', value: completeLambda },
+                  { name: 'CACHE_LAMBDA_NAME', value: getmodulemetadataLambda }
                 ]
               }
             ]
