@@ -4,7 +4,7 @@ import request = require('request-promise-native');
 import { StartPackageValidation, IsExpiredResult } from '../services/checker';
 import { ValidationStart } from '../services/validationStart';
 import { Badge } from '../services/badge';
-import { FileStorage } from '../stores/s3fileStorages';
+import { FileStorage } from '../stores/s3filestorages';
 
 import { PackageInfoApi } from '../api/packageInfo';
 import { EvaluationsApi } from '../api/evaluations';

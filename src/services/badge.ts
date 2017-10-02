@@ -1,5 +1,5 @@
 import { Service, param, inject, injectable, InjectionScope } from 'functionly';
-import { FileStorage } from '../stores/s3fileStorages';
+import { FileStorage } from '../stores/s3filestorages';
 import { EvaluationInfo, PackageInfo } from '../types';
 
 export const getBase64String = async (storage: FileStorage, Key: string) =>
