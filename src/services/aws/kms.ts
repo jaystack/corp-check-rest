@@ -40,7 +40,7 @@ export class KMSApi extends Api {
         { CiphertextBlob: new Buffer(token, 'base64') },
         async (err, data: { Plaintext: Buffer }) => {
           if (err) reject(err);
-          return resolve(data.Plaintext.toString('utf-8'));
+          return resolve(data.Plaintext.toString('utf8'));
         }
       );
     });

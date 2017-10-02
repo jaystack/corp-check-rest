@@ -2,10 +2,13 @@ import { rest, aws, param, inject, use } from 'functionly';
 import { stringify } from 'querystring';
 import request = require('request-promise-native');
 import { StartPackageValidation, IsExpiredResult } from '../services/checker';
+import { ValidationStart } from '../services/validationStart';
+import { Badge } from '../services/badge';
+import { FileStorage } from '../stores/s3fileStorages';
 
 import { PackageInfoApi } from '../api/packageInfo';
 import { EvaluationsApi } from '../api/evaluations';
-import { PackageInfo } from '../types';
+import { PackageInfo, EvaluationInfo } from '../types';
 
 import { CorpCheckRestService } from './corpCheckRestService';
 
@@ -20,48 +23,21 @@ export class Validation extends CorpCheckRestService {
     @param isProduction,
     @param ruleSet,
     @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
-    @inject(EvaluationsApi) evaluationsApi: EvaluationsApi,
-    @inject(IsExpiredResult) isExpiredResult,
-    @inject(StartPackageValidation) startPackageValidation
+    @inject(ValidationStart) validationStart
   ) {
     const isProd = typeof isProduction !== 'undefined';
-    let data: { packageInfo: PackageInfo; created: boolean };
+    let packageInfoFromResult: { packageInfo: PackageInfo; created: boolean };
     if (packageJSON) {
-      data = await packageInfoApi.fromPackageJSON({ packageJSON, isProduction: isProd });
+      packageInfoFromResult = await packageInfoApi.fromPackageJSON({ packageJSON, isProduction: isProd });
     } else if (packageName) {
-      data = await packageInfoApi.fromPackageName({ packageName });
+      packageInfoFromResult = await packageInfoApi.fromPackageName({ packageName });
     } else {
       throw new MissingPackageParameters('packageJSON or packageName');
     }
-    let { packageInfo, created } = data;
 
-    if (await isExpiredResult({ packageInfo, update: true, force: !created && typeof force !== 'undefined' })) {
-      packageInfo = await packageInfoApi.create(packageInfo);
-    }
+    const evaluationInfo = await validationStart({ force, ruleSet, packageInfoFromResult });
 
-    const packageInfoId = packageInfo._id;
-    let evaluationInfo = await evaluationsApi.fromRuleSet({ packageInfoId, ruleSet });
-    if (!evaluationInfo) {
-      evaluationInfo = await evaluationsApi.create({ packageInfoId, ruleSet });
-
-      if (packageInfo.state.type === 'PENDING') {
-        await startPackageValidation({
-          packageName: packageInfo.packageName,
-          packageJSON: packageInfo.packageJSON,
-          cid: evaluationInfo._id,
-          isProduction: packageInfo.isProduction
-        });
-      }
-    }
-
-    if (packageInfo.state.type === 'SUCCEEDED') {
-      await evaluationsApi.evaluate({
-        evaluationInfo,
-        data: packageInfo.meta
-      });
-    }
-
-    return { state: packageInfo.state, cid: evaluationInfo._id };
+    return { state: packageInfoFromResult.packageInfo.state, cid: evaluationInfo._id };
   }
 }
 
@@ -99,6 +75,36 @@ export class Package extends CorpCheckRestService {
   }
 }
 
+@rest({ path: '/badge', methods: [ 'get' ], anonymous: true, cors: true })
+export class BadgeService extends CorpCheckRestService {
+  public async handle(
+    @param scope,
+    @param name,
+    @param version,
+    @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
+    @inject(ValidationStart) validationStart,
+    @inject(Badge) badge,
+    //TODO
+    @inject(FileStorage) files: FileStorage
+  ) {
+    const packageName = `${scope ? `@${scope}/` : ''}${name}@${version || 'latest'}`;
+    const packageInfoFromResult = await packageInfoApi.fromPackageName({ packageName });
+
+    const evaluationInfo: EvaluationInfo = await validationStart({ packageInfoFromResult });
+
+    const content = await badge({ packageInfo: packageInfoFromResult.packageInfo, evaluationInfo });
+    if (!content) throw new Error('missing badge');
+
+    return {
+      status: 200,
+      headers: {
+        'content-type': 'image/svg+xml'
+      },
+      data: content
+    };
+  }
+}
+
 @rest({ path: '/suggestions', methods: [ 'get' ], anonymous: true, cors: true })
 export class Suggestion extends CorpCheckRestService {
   public async handle(@param name, @param version): Promise<{ title: string; description?: string }[]> {
@@ -125,3 +131,4 @@ export class Suggestion extends CorpCheckRestService {
 export const validation = Validation.createInvoker();
 export const packageInfo = Package.createInvoker();
 export const getSuggestions = Suggestion.createInvoker();
+export const badge = BadgeService.createInvoker();

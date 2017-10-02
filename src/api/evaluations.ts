@@ -46,7 +46,7 @@ export class EvaluationsApi extends Api {
     return await this.get({ cid });
   }
 
-  public async updateResult({ cid, result }) {
+  public async updateResult({ cid, result }): Promise<any> {
     const updated = await this.evaluations.updateOne(
       { _id: cid },
       {

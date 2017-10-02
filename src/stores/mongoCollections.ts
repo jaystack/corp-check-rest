@@ -1,8 +1,13 @@
-import { DynamoTable, MongoCollection, MongoConnection } from 'functionly';
+import { DynamoTable, MongoCollection, MongoConnection, mongoConnection } from 'functionly';
 import { injectable, mongoCollection, inject, container, environment, InjectionScope } from 'functionly';
 import { KMSApi } from '../services/aws/kms';
 
-export const MONGO_CONNECTION_URL = 'MONGO_CONNECTION_URL';
+export const STAGE_ENDPOINTS = {
+  dev:
+    'AQICAHjLPCiyfkkMKPgAeOmVYE2S22YSQdPPXzuq04fafcsrmgFq7TETyIDlZsAsQmHvEXbyAAAAszCBsAYJKoZIhvcNAQcGoIGiMIGfAgEAMIGZBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDOxHpV4kijdqMy9YngIBEIBs/LzD9il8DcGMfAl9YU375IH8tT6ulg8I/uYVcN2nxHP4DIolcWuWANfQ+R0rQ6ALV3ZgMwBYxgYP281HEizk47nwpFTlnAFhDK8HCUantJ2/PqXmcygfHsZHQ+bvkRfLZaB/+6gG1CbL7emP',
+  default: ''
+};
+export const DEFAULT_MONGO_ENDPOINT = 'mongodb://localhost:27017/corp-check';
 
 /* KMS resolve connection */
 @injectable(InjectionScope.Singleton)
@@ -13,9 +18,12 @@ export class KMSResolveMongoConnection extends MongoConnection {
     this.resolutions = new Map<string, string>();
   }
 
-  public async connect(url: string) {
+  public async connect(url: string): Promise<any> {
     const mongoUrl =
-      url || process.env[`${MONGO_CONNECTION_URL}-${process.env.FUNCTIONAL_STAGE}`] || process.env.MONGO_CONNECTION_URL;
+      url ||
+      process.env.MONGO_CONNECTION_URL ||
+      STAGE_ENDPOINTS[process.env.FUNCTIONAL_STAGE] ||
+      DEFAULT_MONGO_ENDPOINT;
 
     if (/^mongodb/.test(mongoUrl)) return super.connect(mongoUrl);
 
@@ -34,28 +42,15 @@ export class KMSResolveMongoConnection extends MongoConnection {
 /* chance default mongo connection */
 container.registerType(MongoConnection, KMSResolveMongoConnection);
 
-/* local endpoint */
-export const mongoConnection = (url: string, stage: string = '') =>
-  environment(`${MONGO_CONNECTION_URL}${stage ? '-' + stage : ''}`, url);
-
-@mongoConnection('mongodb://localhost:27017/corp-check')
-@mongoConnection(
-  'AQICAHjLPCiyfkkMKPgAeOmVYE2S22YSQdPPXzuq04fafcsrmgFq7TETyIDlZsAsQmHvEXbyAAAAszCBsAYJKoZIhvcNAQcGoIGiMIGfAgEAMIGZBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDOxHpV4kijdqMy9YngIBEIBs/LzD9il8DcGMfAl9YU375IH8tT6ulg8I/uYVcN2nxHP4DIolcWuWANfQ+R0rQ6ALV3ZgMwBYxgYP281HEizk47nwpFTlnAFhDK8HCUantJ2/PqXmcygfHsZHQ+bvkRfLZaB/+6gG1CbL7emP',
-  'dev'
-)
-@mongoConnection('mongodb://localhost:27017/corp-check', 'stage')
-@mongoConnection('mongodb://localhost:27017/corp-check', 'prod')
-export class CorpCheckCollection extends MongoCollection {}
-
 /* Collections */
 @injectable()
 @mongoCollection({ collectionName: '%ClassName%_corp_check' })
-export class PackageInfoCollection extends CorpCheckCollection {}
+export class PackageInfoCollection extends MongoCollection {}
 
 @injectable()
 @mongoCollection({ collectionName: '%ClassName%_corp_check' })
-export class Evaluations extends CorpCheckCollection {}
+export class Evaluations extends MongoCollection {}
 
 @injectable()
 @mongoCollection({ collectionName: '%ClassName%_corp_check' })
-export class ModuleMetadataCache extends CorpCheckCollection {}
+export class ModuleMetadataCache extends MongoCollection {}

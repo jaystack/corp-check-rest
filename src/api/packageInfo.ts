@@ -88,7 +88,7 @@ export class PackageInfoApi extends Api {
     return await this.get({ hash });
   }
 
-  public async updateState({ _id, type, meta }) {
+  public async updateState({ _id, type, meta }): Promise<any> {
     const updated = await this.packageInfoCollection.updateOne(
       { _id },
       {

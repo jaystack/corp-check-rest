@@ -1,6 +1,7 @@
 {
     "plugins": [
-        "./functionly-plugin/ecsRole"
+        "./functionly-plugin/ecsRole",
+        "./functionly-plugin/filestorage_upload"
     ],
     "debug": false,
     "awsRegion": "eu-central-1",
