@@ -16,7 +16,6 @@ const getLogs = (node: Node, { minVersion }: VersionRule) => {
 @injectable(InjectionScope.Singleton)
 export default class Version extends Service {
   public async handle(@param node: Node, @param rule: VersionRule): Promise<Evaluation> {
-    const depth = typeof rule.depth === 'number' ? rule.depth : Infinity;
     const logs = getLogs(node, rule);
     return {
       name: 'version',

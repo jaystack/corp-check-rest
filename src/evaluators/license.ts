@@ -41,7 +41,6 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
 @injectable(InjectionScope.Singleton)
 export default class License extends Service {
   public async handle(@param node: Node, @param rule: LicenseRule): Promise<Evaluation> {
-    const depth = typeof rule.depth === 'number' ? rule.depth : Infinity;
     const logs = getLogs(node, rule);
     return {
       name: 'license',

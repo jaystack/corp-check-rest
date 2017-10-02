@@ -10,7 +10,14 @@ export type VersionRule = {
   depth?: number;
 };
 
+export type NpmScoresRule = {
+  qualityWeight?: number;
+  popularityWeight?: number;
+  maintenanceWeight?: number;
+};
+
 export type RuleSet = {
   license?: LicenseRule;
   version?: VersionRule;
+  npmScores?: NpmScoresRule;
 };

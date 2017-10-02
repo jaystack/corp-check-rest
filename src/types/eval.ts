@@ -2,7 +2,7 @@ import { Node, PackageMeta } from './info';
 
 export type Log = {
   message: string;
-  type: 'ERROR' | 'WARNING';
+  type: 'ERROR' | 'WARNING' | 'INFO';
   meta?: any;
 };
 

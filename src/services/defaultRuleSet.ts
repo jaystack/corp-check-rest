@@ -43,6 +43,11 @@ export const DEFAULT_CORP_RULE_SET: RuleSet = {
   version: {
     minVersion: '1.0.0',
     depth: null
+  },
+  npmScores: {
+    qualityWeight: 1,
+    popularityWeight: 1,
+    maintenanceWeight: 1
   }
 };
 

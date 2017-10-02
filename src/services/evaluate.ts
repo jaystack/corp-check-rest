@@ -13,6 +13,7 @@ import {
 } from '../types';
 import License from '../evaluators/license';
 import Version from '../evaluators/version';
+import NpmScores from '../evaluators/NpmScores';
 
 const A = 1;
 
@@ -49,9 +50,15 @@ const evaluate = async (evaluators: Evaluator[], rules: any[], meta: Meta, node:
 
 @injectable(InjectionScope.Singleton)
 export class Evaluate extends Service {
-  public async handle(@param data, @param ruleSet, @inject(License) license, @inject(Version) version) {
-    const evaluators: Evaluator[] = [ license, version ]; // evaulators are injectable services
-    const rules = [ ruleSet.license, ruleSet.version ];
+  public async handle(
+    @param data,
+    @param ruleSet,
+    @inject(License) license,
+    @inject(Version) version,
+    @inject(NpmScores) npmScores
+  ) {
+    const evaluators: Evaluator[] = [ license, version, npmScores ]; // evaulators are injectable services
+    const rules = [ ruleSet.license, ruleSet.version, ruleSet.npmScores ];
     const rootEvaluation = await evaluate(evaluators, rules, data.meta, data.tree);
     return {
       rootEvaluation,
