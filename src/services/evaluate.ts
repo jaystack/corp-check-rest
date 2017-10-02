@@ -13,7 +13,7 @@ import {
 } from '../types';
 import License from '../evaluators/license';
 import Version from '../evaluators/version';
-import NpmScores from '../evaluators/NpmScores';
+import NpmScores from '../evaluators/npmScores';
 
 const A = 1;
 
