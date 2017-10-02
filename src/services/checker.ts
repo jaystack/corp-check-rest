@@ -1,5 +1,5 @@
 import { Service, param, injectable, inject, InjectionScope, environment, getFunctionName, stage } from 'functionly';
-import { PackageInfoCollection } from '../stores/mongoCollections';
+import { PackageInfoApi } from '../api/packageInfo';
 import { generate } from 'shortid';
 import * as moment from 'moment';
 import { PackageInfo } from '../types';
@@ -13,7 +13,7 @@ export class IsExpiredResult extends Service {
     @param packageInfo: PackageInfo,
     @param update,
     @param force,
-    @inject(PackageInfoCollection) packageInfoCollection: PackageInfoCollection
+    @inject(PackageInfoApi) packageInfoApi: PackageInfoApi
   ): Promise<any> {
     var now = moment(new Date());
     var end = moment(packageInfo.date);
@@ -31,12 +31,10 @@ export class IsExpiredResult extends Service {
       (packageInfo.state.type === 'SUCCEEDED' && hours > successMaxHours)
     ) {
       if (force || update) {
-        await packageInfoCollection.updateMany(
+        await packageInfoApi.updateMany(
           { hash: packageInfo.hash },
           {
-            $set: {
-              latest: false
-            }
+            latest: false
           }
         );
       }
@@ -57,14 +55,14 @@ export class IsExpiredResult extends Service {
 @environment('FUNCTIONAL_SERVICE_GETMODULEMETADATA', 'GetModuleMeta')
 export class StartPackageValidation extends Service {
   public async handle(@param cid, @param packageName, @param packageJSON, @param isProduction, @stage stage) {
-    const cluster = process.env.TASKOPTION_CLUSTER || `corp-check-${stage}` ;
+    const cluster = process.env.TASKOPTION_CLUSTER || `corp-check-${stage}`;
     const taskDefinition = process.env.TASKOPTION_TASKDEFINITION || 'check';
     const taskName = process.env.TASKOPTION_TASKNAME || 'checker';
     const region = process.env.TASKOPTION_REGION || process.env.AWS_REGION || 'eu-central-1';
     const lambdaRegion = process.env.TASKOPTION_COMPLETELAMBDAREGION || process.env.AWS_REGION || 'eu-central-1';
     const completeLambda = process.env.FUNCTIONAL_SERVICE_COMPLETE;
     const getmodulemetadataLambda = process.env.FUNCTIONAL_SERVICE_GETMODULEMETADATA;
-    
+
     return new Promise((resolve, reject) => {
       new AWS.ECS({ region }).runTask(
         {

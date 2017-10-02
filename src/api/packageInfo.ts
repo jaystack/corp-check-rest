@@ -101,4 +101,10 @@ export class PackageInfoApi extends Api {
 
     return { updated };
   }
+
+  public async updateMany(filter, update) {
+    return await this.packageInfoCollection.updateMany(filter, {
+      $set: update
+    });
+  }
 }
