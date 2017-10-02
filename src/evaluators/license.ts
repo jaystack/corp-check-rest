@@ -19,7 +19,7 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
   if (exclude && exclude.map(l => l.toLowerCase()).includes(license))
     return [
       {
-        message: `Unallowed license: '${node.license.type}'`,
+        message: `Unallowed license: ${node.license.type}`,
         type: 'ERROR'
       } as Log
     ];
