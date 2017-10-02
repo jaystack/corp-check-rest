@@ -40,6 +40,7 @@ const evaluate = async (evaluators: Evaluator[], rules: any[], meta: Meta, node:
   const selfScore = evaluations.reduce((acc, { score }) => acc * score, 1);
   return {
     nodeName: node.name,
+    nodeVersion: node.version,
     evaluations,
     nodeScore: getNodeScore(selfScore, dependencyEvaluations.map(({ nodeScore }) => nodeScore)),
     dependencies: dependencyEvaluations

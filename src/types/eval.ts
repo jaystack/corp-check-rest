@@ -22,6 +22,7 @@ export type Qualification = 'RECOMMENDED' | 'ACCEPTED' | 'REJECTED';
 
 export type NodeEvaluation = {
   nodeName: string;
+  nodeVersion: string;
   evaluations: Evaluation[];
   nodeScore: number;
   dependencies: NodeEvaluation[];
