@@ -5,9 +5,8 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
   if (licenseRequired && !node.license.type)
     return [
       {
-        message: `missing license`,
-        type: 'ERROR',
-        meta: { licenseType: node.license.type, type: 'NOTDEFINED' }
+        message: `Missing license`,
+        type: 'ERROR'
       } as Log
     ];
 
@@ -20,18 +19,16 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
   if (exclude && exclude.map(l => l.toLowerCase()).includes(license))
     return [
       {
-        message: `has excluded license '${node.license.type}'`,
-        type: 'ERROR',
-        meta: { licenseType: node.license.type, type: 'CONTAINS' }
+        message: `Unallowed license: '${node.license.type}'`,
+        type: 'ERROR'
       } as Log
     ];
 
   if (include && !include.map(l => l.toLowerCase()).includes(license))
     return [
       {
-        message: `not allowed '${node.license.type}'`,
-        type: 'ERROR',
-        meta: { licenseType: node.license.type, type: 'MISSING' }
+        message: `Unknown license: '${node.license.type}'`,
+        type: 'ERROR'
       } as Log
     ];
 
@@ -44,7 +41,7 @@ export default class License extends Service {
     const logs = getLogs(node, rule);
     return {
       name: 'license',
-      description: logs.length > 0 ? 'Invalid license' : 'License is valid',
+      description: '',
       score: logs.length > 0 ? 0 : 1,
       logs
     } as Evaluation;

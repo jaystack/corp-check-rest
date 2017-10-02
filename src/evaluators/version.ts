@@ -5,9 +5,8 @@ const getLogs = (node: Node, { minVersion }: VersionRule) => {
   return minVersion && node.version < minVersion
     ? [
         {
-          message: node.version,
-          type: 'ERROR',
-          meta: { version: node.version }
+          message: `Unstable version: ${node.version}`,
+          type: 'ERROR'
         } as Log
       ]
     : [];
@@ -19,7 +18,7 @@ export default class Version extends Service {
     const logs = getLogs(node, rule);
     return {
       name: 'version',
-      description: logs.length > 0 ? `Invalid version` : 'Version is valid',
+      description: '',
       score: logs.length > 0 ? 0 : 1,
       logs
     };
