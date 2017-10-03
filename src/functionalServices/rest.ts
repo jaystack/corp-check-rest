@@ -25,10 +25,9 @@ export class Validation extends CorpCheckRestService {
     @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
     @inject(ValidationStart) validationStart
   ) {
-    const isProd = typeof isProduction !== 'undefined';
     let packageInfoFromResult: { packageInfo: PackageInfo; created: boolean };
     if (packageJSON) {
-      packageInfoFromResult = await packageInfoApi.fromPackageJSON({ packageJSON, isProduction: isProd });
+      packageInfoFromResult = await packageInfoApi.fromPackageJSON({ packageJSON, isProduction: !!isProduction });
     } else if (packageName) {
       packageInfoFromResult = await packageInfoApi.fromPackageName({ packageName });
     } else {
