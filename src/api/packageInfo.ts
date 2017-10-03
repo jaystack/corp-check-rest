@@ -24,7 +24,7 @@ export class PackageInfoApi extends Api {
       info = await this.create({
         hash,
         packageJSON,
-        isProduction: true
+        isProduction,
       });
       created = true;
     }
