@@ -1,8 +1,10 @@
 import { Node, PackageMeta } from './info';
 
+export type LogType = 'ERROR' | 'WARNING' | 'INFO';
+
 export type Log = {
   message: string;
-  type: 'ERROR' | 'WARNING' | 'INFO';
+  type: LogType;
   meta?: any;
 };
 

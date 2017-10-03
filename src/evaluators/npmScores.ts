@@ -1,8 +1,8 @@
 import { Service, param, injectable, InjectionScope } from 'functionly';
-import { Node, NpmScoresRule, PackageMeta, Evaluation, Log } from '../types';
+import { Node, NpmScoresRule, PackageMeta, Evaluation, Log, LogType } from '../types';
 
 const getPercentage = (score: number): string => (Number.isFinite(score) ? Math.round(score * 100) + '%' : 'unknown');
-const getLogType = (value: number): string => (value < 0.5 ? 'WARNING' : 'INFO');
+const getLogType = (value: number): LogType => (value < 0.5 ? 'WARNING' : 'INFO');
 
 @injectable(InjectionScope.Singleton)
 export default class NpmScores extends Service {
