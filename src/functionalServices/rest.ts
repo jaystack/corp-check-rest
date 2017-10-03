@@ -65,7 +65,7 @@ export class Package extends CorpCheckRestService {
 
       const packageInfo = await packageInfoApi.getById({ _id: evaluationInfo.packageInfoId });
       if (packageInfo) {
-        result.name = packageInfo.packageName || `${packageInfo.packageJSON.name}@${packageInfo.date}`;
+        result.name = packageInfo.packageName || `${packageInfo.packageJSON.name}@${packageInfo.packageJSON.version}`;
         result.state = <any>packageInfo.state;
         result.expired = await isExpiredResult({ packageInfo, update: false, force: false });
       }
