@@ -2,6 +2,7 @@ import { Service, param, injectable, InjectionScope } from 'functionly';
 import { Node, NpmScoresRule, PackageMeta, Evaluation, Log } from '../types';
 
 const getPercentage = (score: number): string => (Number.isFinite(score) ? Math.round(score * 100) + '%' : 'unknown');
+const getLogType = (value: number): string => (value < 0.5 ? 'WARNING' : 'INFO');
 
 @injectable(InjectionScope.Singleton)
 export default class NpmScores extends Service {
@@ -19,9 +20,9 @@ export default class NpmScores extends Service {
         (qualityWeight * quality + popularityWeight * popularity + maintenanceWeight * maintenance) /
         (qualityWeight + popularityWeight + maintenanceWeight),
       logs: [
-        { type: 'INFO', message: `Quality: ${getPercentage(quality)}` },
-        { type: 'INFO', message: `Popularity: ${getPercentage(popularity)}` },
-        { type: 'INFO', message: `Maintenance: ${getPercentage(maintenance)}` }
+        { type: getLogType(quality), message: `Quality: ${getPercentage(quality)}` },
+        { type: getLogType(popularity), message: `Popularity: ${getPercentage(popularity)}` },
+        { type: getLogType(maintenance), message: `Maintenance: ${getPercentage(maintenance)}` }
       ]
     };
   }
