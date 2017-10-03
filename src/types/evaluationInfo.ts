@@ -1,7 +1,7 @@
 import { FinalEvaluation } from './eval';
 
 export type EvaluationInfo = {
-  _id: any;
+  id: any;
   packageInfoId: string;
   date: number;
   ruleSet: Object;

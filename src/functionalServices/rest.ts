@@ -37,7 +37,7 @@ export class Validation extends CorpCheckRestService {
 
     const evaluationInfo = await validationStart({ force, ruleSet, packageInfoFromResult });
 
-    return { state: packageInfoFromResult.packageInfo.state, cid: evaluationInfo._id };
+    return { state: packageInfoFromResult.packageInfo.state, cid: evaluationInfo.id };
   }
 }
 
@@ -63,7 +63,7 @@ export class Package extends CorpCheckRestService {
       result.result = evaluationInfo.result;
       result.ruleSet = evaluationInfo.ruleSet;
 
-      const packageInfo = await packageInfoApi.getById({ _id: evaluationInfo.packageInfoId });
+      const packageInfo = await packageInfoApi.getById({ id: evaluationInfo.packageInfoId });
       if (packageInfo) {
         result.name = packageInfo.packageName || `${packageInfo.packageJSON.name}@${packageInfo.date}`;
         result.state = <any>packageInfo.state;

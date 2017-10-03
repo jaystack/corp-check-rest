@@ -16,9 +16,9 @@ export class CreateCacheItems extends Service {
     for (const key in meta) {
       const item: any = meta[key];
       if (!item.date) {
-        item._id = key;
+        item.id = key;
         item.date = Date.now();
-        await moduleMetadataCache.update({ _id: key }, { $set: item }, { upsert: true });
+        await moduleMetadataCache.update({ id: key }, { $set: item }, { upsert: true });
       }
     }
   }
@@ -31,13 +31,13 @@ export class GetModuleMeta extends CorpCheckRestService {
   public async handle(@param modules, @inject(ModuleMetadataCache) moduleMetadataCache: ModuleMetadataCache) {
     const result: MetaObject = {};
     const cacheResult: ModuleMetadata[] = await moduleMetadataCache
-      .find<ModuleMetadata>({ _id: { $in: modules || [] } })
+      .find<ModuleMetadata>({ id: { $in: modules || [] } })
       .toArray();
 
     const expirationGap = process.env.MODULE_META_EXPIRATION_IN_HOURS * 60 * 60 * 1000 || 2 * 24 * 60 * 60 * 1000;
 
     for (const item of cacheResult) {
-      if (item.date && item.date > Date.now() - expirationGap) result[item._id] = item;
+      if (item.date && item.date > Date.now() - expirationGap) result[item.id] = item;
     }
 
     return result;

@@ -1,5 +1,5 @@
 export type PackageInfo = {
-  _id: any;
+  id: any;
   hash: string;
   packageName?: string;
   packageJSON?: any;

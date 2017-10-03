@@ -1,5 +1,5 @@
 export type ModuleMetadata = {
-  _id: string;
+  id: string;
   date: number;
   [key: string]: any
 };

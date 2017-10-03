@@ -23,7 +23,7 @@ export class ValidationStart extends Service {
       packageInfo = await packageInfoApi.create(packageInfo);
     }
 
-    const packageInfoId = packageInfo._id;
+    const packageInfoId = packageInfo.id;
     let evaluationInfo = await evaluationsApi.fromRuleSet({ packageInfoId, ruleSet });
     if (!evaluationInfo) {
       evaluationInfo = await evaluationsApi.create({ packageInfoId, ruleSet });
@@ -32,7 +32,7 @@ export class ValidationStart extends Service {
         await startPackageValidation({
           packageName: packageInfo.packageName,
           packageJSON: packageInfo.packageJSON,
-          cid: evaluationInfo._id,
+          cid: evaluationInfo.id,
           isProduction: packageInfo.isProduction
         });
       }

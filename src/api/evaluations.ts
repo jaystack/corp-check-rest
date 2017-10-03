@@ -1,5 +1,5 @@
 import { Api, inject, injectable, InjectionScope } from 'functionly';
-import { Evaluations } from '../stores/mongoCollections';
+import { Evaluations } from '../stores/dynamoTables';
 import { GetNpmInfo } from '../services/npm';
 import { generate } from 'shortid';
 import * as getHash from 'hash-sum';
@@ -20,41 +20,61 @@ export class EvaluationsApi extends Api {
     super();
   }
 
-  public async fromRuleSet({ packageInfoId, ruleSet }) {
+  public async fromRuleSet({ packageInfoId, ruleSet }): Promise<EvaluationInfo> {
     const ruleSetHash = getHash(JSON.stringify(ruleSet));
 
-    return await this.evaluations.findOne<EvaluationInfo>({ packageInfoId, ruleSetHash });
+    const item = (await this.evaluations.scan({
+      FilterExpression: 'packageInfoId = :packageInfoId and ruleSetHash = :ruleSetHash',
+      ExpressionAttributeValues: {
+        ':packageInfoId': packageInfoId,
+        ':ruleSetHash': ruleSetHash
+      }
+    })).Items[0];
+
+    if (!item) return null;
+    return <EvaluationInfo>{
+      ...item,
+      ruleSet: typeof item.ruleSet === 'string' ? JSON.parse(item.ruleSet) : item.ruleSet,
+      result: typeof item.result === 'string' ? JSON.parse(item.result) : item.result
+    };
   }
 
   public async get({ cid }) {
-    return await this.evaluations.findOne<EvaluationInfo>({ _id: cid });
+    const item = <EvaluationInfo>(await this.evaluations.get({ Key: { id: cid } })).Item;
+
+    return {
+      ...item,
+      ruleSet: typeof item.ruleSet === 'string' ? JSON.parse(item.ruleSet) : item.ruleSet,
+      result: typeof item.result === 'string' ? JSON.parse(item.result) : item.result
+    };
   }
 
   public async create({ packageInfoId, ruleSet }) {
     const ruleSetHash = getHash(JSON.stringify(ruleSet));
     const date = Date.now();
     const cid = generate();
-    const item = await this.evaluations.insertOne({
-      _id: cid,
-      packageInfoId,
-      date,
-      ruleSet,
-      ruleSetHash,
-      result: null
+    const item = await this.evaluations.put({
+      Item: {
+        id: cid,
+        packageInfoId,
+        date,
+        ruleSet: ruleSet ? JSON.stringify(ruleSet) : ruleSet,
+        ruleSetHash,
+        result: null
+      }
     });
 
     return await this.get({ cid });
   }
 
   public async updateResult({ cid, result }): Promise<any> {
-    const updated = await this.evaluations.updateOne(
-      { _id: cid },
-      {
-        $set: {
-          result
-        }
+    const updated = await this.evaluations.update({
+      Key: { id: cid },
+      UpdateExpression: 'set result = :r',
+      ExpressionAttributeValues: {
+        ':r': JSON.stringify(result)
       }
-    );
+    });
 
     return { updated };
   }
@@ -67,18 +87,18 @@ export class EvaluationsApi extends Api {
 
     try {
       await this.packageInfoApi.updateState({
-        _id: evaluationInfo.packageInfoId,
+        id: evaluationInfo.packageInfoId,
         meta: data,
         type: 'SUCCEEDED'
       });
 
       await this.updateResult({
-        cid: evaluationInfo._id,
+        cid: evaluationInfo.id,
         result
       });
     } catch (e) {
       await this.packageInfoApi.updateState({
-        _id: evaluationInfo.packageInfoId,
+        id: evaluationInfo.packageInfoId,
         meta: { message: 'error in evaluate' },
         type: 'FAILED'
       });
