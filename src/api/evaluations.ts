@@ -60,29 +60,33 @@ export class EvaluationsApi extends Api {
   }
 
   public async evaluate({ evaluationInfo, data }) {
+    console.log('3.1', new Date().toISOString());
     const result = await this.evaluateService({
       data,
       ruleSet: await this.getRuleSet({ ruleSet: evaluationInfo.ruleSet })
     });
-
     try {
+      console.log('3.2', new Date().toISOString());
       await this.packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
         meta: data,
         type: 'SUCCEEDED'
       });
-
+      console.log('3.3', new Date().toISOString());
       await this.updateResult({
         cid: evaluationInfo._id,
         result
       });
     } catch (e) {
+      console.log('catch', new Date().toISOString());
       await this.packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
         meta: { message: 'error in evaluate' },
         type: 'FAILED'
       });
       throw e;
+    } finally {
+      console.log('finally', new Date().toISOString());
     }
   }
 }
