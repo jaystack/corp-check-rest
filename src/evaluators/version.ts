@@ -7,7 +7,7 @@ const getLogs = (node: Node, depth: number, { minVersion, isRigorous, rigorousDe
   return [
     {
       message: `Unstable version: ${node.version}`,
-      type: isRigorous && rigorousDepth <= depth ? LogType.ERROR : LogType.WARNING
+      type: isRigorous && depth <= rigorousDepth ? LogType.ERROR : LogType.WARNING
     } as Log
   ];
 };

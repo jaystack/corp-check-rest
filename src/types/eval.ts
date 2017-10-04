@@ -1,9 +1,9 @@
 import { Node, PackageMeta } from './info';
 
 export enum LogType {
-  ERROR,
-  WARNING,
-  INFO
+  ERROR = 'ERROR',
+  WARNING = 'WARNING',
+  INFO = 'INFO'
 }
 
 export type Log = {
