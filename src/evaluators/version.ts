@@ -3,7 +3,7 @@ import { Info as Data, VersionRule, Node, Evaluation, Log, Evaluator, LogType } 
 
 const getLogs = (node: Node, depth: number, { minVersion, isRigorous, rigorousDepth }: VersionRule) => {
   if (!minVersion) return [];
-  if (minVersion && node.version > minVersion) return [];
+  if (minVersion && node.version >= minVersion) return [];
   return [
     {
       message: `Unstable version: ${node.version}`,
