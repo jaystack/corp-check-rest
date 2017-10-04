@@ -2,7 +2,7 @@ import { Service, param, injectable, InjectionScope } from 'functionly';
 import { Node, NpmScoresRule, PackageMeta, Evaluation, Log, LogType, Evaluator } from '../types';
 
 const getPercentage = (score: number): string => (Number.isFinite(score) ? Math.round(score * 100) + '%' : 'unknown');
-const getLogType = (value: number): LogType => (value < 0.5 ? 'WARNING' : 'INFO');
+const getLogType = (value: number): LogType => (value < 0.5 ? LogType.WARNING : LogType.INFO);
 
 export default (({ node, packageMeta, rule, depth }) => {
   const { npmScores: { quality = null, popularity = null, maintenance = null } = {} } = packageMeta;

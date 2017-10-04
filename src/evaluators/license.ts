@@ -1,12 +1,12 @@
 import { Service, param, injectable, InjectionScope } from 'functionly';
-import { Node, LicenseRule, PackageMeta, Evaluation, Log, Evaluator } from '../types';
+import { Node, LicenseRule, PackageMeta, Evaluation, Log, Evaluator, LogType } from '../types';
 
 const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule): Log[] => {
   if (licenseRequired && !node.license.type)
     return [
       {
         message: `Missing license`,
-        type: 'ERROR'
+        type: LogType.ERROR
       } as Log
     ];
 
@@ -20,7 +20,7 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
     return [
       {
         message: `Forbidden license: ${node.license.type}`,
-        type: 'ERROR'
+        type: LogType.ERROR
       } as Log
     ];
 
@@ -28,7 +28,7 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
     return [
       {
         message: `Not allowed license: ${node.license.type}`,
-        type: 'ERROR'
+        type: LogType.ERROR
       } as Log
     ];
 
