@@ -26,10 +26,10 @@
   },
   "dependencies": {
     "aws-sdk": "^2.123.0",
-    "deepmerge": "^1.5.2",
     "functionly": "0.0.15",
     "hash-sum": "^1.0.2",
     "moment": "^2.18.1",
+    "ramda": "^0.24.1",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "shortid": "^2.2.8"

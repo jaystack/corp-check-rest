@@ -1,4 +1,4 @@
-import merge = require('deepmerge');
+import { mergeDeepRight as merge } from 'ramda';
 import { Service, injectable, InjectionScope, param } from 'functionly';
 import { RuleSet } from '../types';
 
@@ -64,6 +64,6 @@ export const DEFAULT_CORP_RULE_SET: RuleSet = {
 @injectable(InjectionScope.Singleton)
 export class GetRuleSet extends Service {
   public async handle(@param ruleSet: RuleSet) {
-    return merge(DEFAULT_CORP_RULE_SET, ruleSet);
+    return merge(DEFAULT_CORP_RULE_SET, ruleSet || {});
   }
 }
