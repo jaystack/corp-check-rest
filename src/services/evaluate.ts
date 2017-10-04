@@ -11,9 +11,9 @@ import {
   NodeEvaluation,
   FinalEvaluation
 } from '../types';
-import License from '../evaluators/license';
-import Version from '../evaluators/version';
-import NpmScores from '../evaluators/npmScores';
+import license from '../evaluators/license';
+import version from '../evaluators/version';
+import npmScores from '../evaluators/npmScores';
 
 const A = 1;
 
@@ -29,14 +29,12 @@ const getNodeScore = (selfScore: number, dependencyScores: number[]): number => 
   return Math.min(selfScore, ...dependencyScores.map(weightFunction));
 };
 
-const evaluate = async (evaluators: Evaluator[], rules: any[], meta: Meta, node: Node): Promise<NodeEvaluation> => {
-  const evaluations = await Promise.all(
-    evaluators.map((evaluator, i) =>
-      evaluator({ node, packageMeta: meta[node.name] || ({} as PackageMeta), rule: rules[i] || {} })
-    )
+const evaluate = (evaluators: Evaluator[], rules: any[], meta: Meta, node: Node, depth: number = 0): NodeEvaluation => {
+  const evaluations = evaluators.map((evaluator, i) =>
+    evaluator({ node, packageMeta: meta[node.name] || ({} as PackageMeta), rule: rules[i] || {}, depth })
   );
-  const dependencyEvaluations = await Promise.all(
-    node.dependencies.map(dependency => evaluate(evaluators, rules, meta, dependency))
+  const dependencyEvaluations = node.dependencies.map(dependency =>
+    evaluate(evaluators, rules, meta, dependency, depth + 1)
   );
   const selfScore = evaluations.reduce((acc, { score }) => acc * score, 1);
   return {
@@ -50,16 +48,10 @@ const evaluate = async (evaluators: Evaluator[], rules: any[], meta: Meta, node:
 
 @injectable(InjectionScope.Singleton)
 export class Evaluate extends Service {
-  public async handle(
-    @param data,
-    @param ruleSet,
-    @inject(License) license,
-    @inject(Version) version,
-    @inject(NpmScores) npmScores
-  ) {
-    const evaluators: Evaluator[] = [ license, version, npmScores ]; // evaulators are injectable services
+  public async handle(@param data, @param ruleSet) {
+    const evaluators: Evaluator[] = [ license, version, npmScores ];
     const rules = [ ruleSet.license, ruleSet.version, ruleSet.npmScores ];
-    const rootEvaluation = await evaluate(evaluators, rules, data.meta, data.tree);
+    const rootEvaluation = evaluate(evaluators, rules, data.meta, data.tree);
     return {
       rootEvaluation,
       qualification: qualificate(rootEvaluation.nodeScore)

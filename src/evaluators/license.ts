@@ -1,5 +1,5 @@
 import { Service, param, injectable, InjectionScope } from 'functionly';
-import { Node, LicenseRule, PackageMeta, Evaluation, Log } from '../types';
+import { Node, LicenseRule, PackageMeta, Evaluation, Log, Evaluator } from '../types';
 
 const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule): Log[] => {
   if (licenseRequired && !node.license.type)
@@ -35,15 +35,12 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
   return [];
 };
 
-@injectable(InjectionScope.Singleton)
-export default class License extends Service {
-  public async handle(@param node: Node, @param rule: LicenseRule): Promise<Evaluation> {
-    const logs = getLogs(node, rule);
-    return {
-      name: 'license',
-      description: '',
-      score: logs.length > 0 ? 0 : 1,
-      logs
-    } as Evaluation;
-  }
-}
+export default (({ node, rule, depth }) => {
+  const logs = getLogs(node, rule);
+  return {
+    name: 'license',
+    description: '',
+    score: logs.length > 0 ? 0 : 1,
+    logs
+  } as Evaluation;
+}) as Evaluator<LicenseRule>;
