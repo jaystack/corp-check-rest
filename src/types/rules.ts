@@ -6,8 +6,10 @@ export type LicenseRule = {
 };
 
 export type VersionRule = {
-  minVersion: string;
-  depth?: number;
+  minVersion?: string;
+  isRigorous?: boolean;
+  rigorousDepth?: number;
+  retributionScore?: number;
 };
 
 export type NpmScoresRule = {

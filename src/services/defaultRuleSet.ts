@@ -1,3 +1,4 @@
+import merge = require('deepmerge');
 import { Service, injectable, InjectionScope, param } from 'functionly';
 import { RuleSet } from '../types';
 
@@ -42,7 +43,9 @@ export const DEFAULT_CORP_RULE_SET: RuleSet = {
   },
   version: {
     minVersion: '1.0.0',
-    depth: null
+    isRigorous: true,
+    rigorousDepth: 1,
+    retributionScore: 0.5
   },
   npmScores: {
     qualityWeight: 1,
@@ -51,9 +54,16 @@ export const DEFAULT_CORP_RULE_SET: RuleSet = {
   }
 };
 
+/**
+ * TODO
+ * For turning on and off a plugin you should skip
+ * his key-value pair from the rule set. So the final
+ * solution is deep merging plugin rules one by one.
+ */
+
 @injectable(InjectionScope.Singleton)
 export class GetRuleSet extends Service {
   public async handle(@param ruleSet: RuleSet) {
-    return ruleSet || DEFAULT_CORP_RULE_SET;
+    return merge(DEFAULT_CORP_RULE_SET, ruleSet);
   }
 }
