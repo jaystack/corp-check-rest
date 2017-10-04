@@ -54,7 +54,15 @@ export class IsExpiredResult extends Service {
 @environment('FUNCTIONAL_SERVICE_COMPLETE', 'Complete')
 @environment('FUNCTIONAL_SERVICE_GETMODULEMETADATA', 'GetModuleMeta')
 export class StartPackageValidation extends Service {
-  public async handle(@param cid, @param packageName, @param packageJSON, @param isProduction, @stage stage) {
+  public async handle(
+    @param cid,
+    @param packageName,
+    @param packageJSONS3Key,
+    @param packageLockS3Key,
+    @param yarnLockS3Key,
+    @param isProduction,
+    @stage stage
+  ) {
     const cluster = process.env.TASKOPTION_CLUSTER || `corp-check-${stage}`;
     const taskDefinition = process.env.TASKOPTION_TASKDEFINITION || 'check';
     const taskName = process.env.TASKOPTION_TASKNAME || 'checker';
@@ -62,8 +70,19 @@ export class StartPackageValidation extends Service {
     const lambdaRegion = process.env.TASKOPTION_COMPLETELAMBDAREGION || process.env.AWS_REGION || 'eu-central-1';
     const completeLambda = process.env.FUNCTIONAL_SERVICE_COMPLETE;
     const getmodulemetadataLambda = process.env.FUNCTIONAL_SERVICE_GETMODULEMETADATA;
+    const s3BucketName = process.env.FileStorage_S3_BUCKET + `-${process.env.FUNCTIONAL_STAGE}`;
 
     return new Promise((resolve, reject) => {
+      const command = [ 'node', '.', cid, packageJSONS3Key || packageName ];
+
+      if (packageLockS3Key) {
+        command.push(...[ '--package-lock', packageLockS3Key ]);
+      }
+
+      if (yarnLockS3Key) {
+        command.push(...[ '--yarn-lock', yarnLockS3Key ]);
+      }
+
       new AWS.ECS({ region }).runTask(
         {
           cluster,
@@ -72,12 +91,13 @@ export class StartPackageValidation extends Service {
             containerOverrides: [
               {
                 name: taskName,
-                command: [ 'node', '.', cid, packageName || JSON.stringify(packageJSON) ],
+                command,
                 environment: [
                   { name: 'NODE_ENV', value: isProduction ? 'production' : 'dev' },
                   { name: 'REGION', value: lambdaRegion },
                   { name: 'COMPLETE_LAMBDA_NAME', value: completeLambda },
-                  { name: 'CACHE_LAMBDA_NAME', value: getmodulemetadataLambda }
+                  { name: 'CACHE_LAMBDA_NAME', value: getmodulemetadataLambda },
+                  { name: 'S3_BUCKET_NAME', value: s3BucketName }
                 ]
               }
             ]

@@ -20,14 +20,23 @@ export class Validation extends CorpCheckRestService {
     @param packageName,
     @param force,
     @param packageJSON,
+    @param packageLock,
+    @param yarnLock,
     @param isProduction,
     @param ruleSet,
     @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
-    @inject(ValidationStart) validationStart
+    @inject(ValidationStart) validationStart,
+    //TODO
+    @inject(FileStorage) files: FileStorage
   ) {
     let packageInfoFromResult: { packageInfo: PackageInfo; created: boolean };
     if (packageJSON) {
-      packageInfoFromResult = await packageInfoApi.fromPackageJSON({ packageJSON, isProduction: !!isProduction });
+      packageInfoFromResult = await packageInfoApi.fromPackageJSON({
+        packageJSON,
+        packageLock,
+        yarnLock,
+        isProduction: !!isProduction
+      });
     } else if (packageName) {
       packageInfoFromResult = await packageInfoApi.fromPackageName({ packageName });
     } else {
@@ -64,7 +73,7 @@ export class Package extends CorpCheckRestService {
 
       const packageInfo = await packageInfoApi.getById({ _id: evaluationInfo.packageInfoId });
       if (packageInfo) {
-        result.name = packageInfo.packageName || `${packageInfo.packageJSON.name}@${packageInfo.packageJSON.version}`;
+        result.name = packageInfo.packageName || 'undefined';
         result.state = <any>packageInfo.state;
         result.expired = await isExpiredResult({ packageInfo, update: false, force: false });
       }

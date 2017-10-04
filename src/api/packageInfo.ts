@@ -1,6 +1,7 @@
 import { Api, inject, injectable, InjectionScope } from 'functionly';
 import { PackageInfoCollection } from '../stores/mongoCollections';
 import { GetNpmInfo } from '../services/npm';
+import { FileStorage } from '../stores/s3filestorages';
 import * as getHash from 'hash-sum';
 import { PackageInfo } from '../types';
 
@@ -10,21 +11,38 @@ const NPM_PACKAGE_NAME_PATTERN = /^((@([^@]+)\/)?([^@]+))(@(.*))?$/;
 export class PackageInfoApi extends Api {
   constructor(
     @inject(GetNpmInfo) private getNPMInfo,
-    @inject(PackageInfoCollection) private packageInfoCollection: PackageInfoCollection
+    @inject(PackageInfoCollection) private packageInfoCollection: PackageInfoCollection,
+    @inject(FileStorage) private files: FileStorage
   ) {
     super();
   }
 
-  public async fromPackageJSON({ packageJSON, isProduction }: { packageJSON: Object; isProduction: boolean }) {
-    const hash = getHash(isProduction.toString() + JSON.stringify(packageJSON));
+  public async fromPackageJSON({
+    packageJSON,
+    packageLock,
+    yarnLock,
+    isProduction
+  }: {
+    packageJSON: Object;
+    packageLock?: Object;
+    yarnLock?: string;
+    isProduction: boolean;
+  }) {
+    const hash = getHash(
+      isProduction.toString() + JSON.stringify(packageJSON) + JSON.stringify(packageLock) + JSON.stringify(yarnLock)
+    );
 
     let created = false;
     let info = await this.get({ hash });
     if (!info) {
       info = await this.create({
         hash,
+        packageName: `${packageJSON['name']}@${packageJSON['version']}`,
         packageJSON,
+        packageLock,
+        yarnLock,
         isProduction,
+        isNpmModule: false
       });
       created = true;
     }
@@ -44,7 +62,8 @@ export class PackageInfoApi extends Api {
       info = await this.create({
         hash,
         packageName: `${packageInfo.name}@${packageInfo.version}`,
-        isProduction: true
+        isProduction: true,
+        isNpmModule: true
       });
       created = true;
     }
@@ -64,18 +83,37 @@ export class PackageInfoApi extends Api {
     hash,
     packageName,
     packageJSON,
-    isProduction
+    packageLock,
+    yarnLock,
+    isProduction,
+    isNpmModule
   }: {
     hash: string;
     packageName?: string;
     packageJSON?: Object;
+    packageLock?: Object;
+    yarnLock?: string;
     isProduction: boolean;
+    isNpmModule: boolean;
   }) {
     const date = Date.now();
+
+    const packageJSONS3Key = await this.uploadFile(
+      `packages/${hash}/package.json`,
+      packageJSON && JSON.stringify(packageJSON)
+    );
+    const packageLockS3Key = await this.uploadFile(
+      `packages/${hash}/package-lock.json`,
+      packageLock && JSON.stringify(packageLock)
+    );
+    const yarnLockS3Key = await this.uploadFile(`packages/${hash}/yarn.lock`, yarnLock);
+
     const item = await this.packageInfoCollection.insertOne({
       hash,
       packageName,
-      packageJSON,
+      packageJSONS3Key,
+      packageLockS3Key,
+      yarnLockS3Key,
       isProduction,
       date,
       state: {
@@ -106,5 +144,18 @@ export class PackageInfoApi extends Api {
     return await this.packageInfoCollection.updateMany(filter, {
       $set: update
     });
+  }
+
+  private async uploadFile(key: string, body?: Object) {
+    if (body) {
+      await this.files.putObject({
+        Body: body,
+        Key: key
+      });
+
+      return key;
+    }
+
+    return undefined;
   }
 }
