@@ -64,13 +64,13 @@ export class StartPackageValidation extends Service {
     @stage stage
   ) {
     const cluster = process.env.TASKOPTION_CLUSTER || `corp-check-${stage}`;
-    const taskDefinition = process.env.TASKOPTION_TASKDEFINITION || 'check';
+    const taskDefinition = (process.env.TASKOPTION_TASKDEFINITION || 'check') + `-${stage}`;
     const taskName = process.env.TASKOPTION_TASKNAME || 'checker';
     const region = process.env.TASKOPTION_REGION || process.env.AWS_REGION || 'eu-central-1';
     const lambdaRegion = process.env.TASKOPTION_COMPLETELAMBDAREGION || process.env.AWS_REGION || 'eu-central-1';
     const completeLambda = process.env.FUNCTIONAL_SERVICE_COMPLETE;
     const getmodulemetadataLambda = process.env.FUNCTIONAL_SERVICE_GETMODULEMETADATA;
-    const s3BucketName = process.env.FileStorage_S3_BUCKET + `-${process.env.FUNCTIONAL_STAGE}`;
+    const s3BucketName = process.env.FileStorage_S3_BUCKET + `-${stage}`;
 
     return new Promise((resolve, reject) => {
       const p4 = packageJSONS3Key ? `s3://${packageJSONS3Key}` : packageName;
