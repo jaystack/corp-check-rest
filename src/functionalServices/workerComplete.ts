@@ -17,6 +17,10 @@ export class Complete extends CorpCheckRestService {
     @inject(EvaluationsApi) evaluationsApi: EvaluationsApi,
     @inject(CreateCacheItems) createCacheItems
   ) {
+    console.log('cid', cid);
+    console.log('data', data);
+    console.log('error', error);
+
     console.log('1', new Date().toISOString());
     const evaluationInfo = await evaluationsApi.get({ cid });
     if (!evaluationInfo) return;
