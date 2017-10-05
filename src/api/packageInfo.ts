@@ -23,21 +23,26 @@ export class PackageInfoApi extends Api {
     yarnLock,
     isProduction
   }: {
-    packageJSON: Object;
-    packageLock?: Object;
+    packageJSON: string;
+    packageLock?: string;
     yarnLock?: string;
     isProduction: boolean;
   }) {
-    const hash = getHash(
-      isProduction.toString() + JSON.stringify(packageJSON) + JSON.stringify(packageLock) + JSON.stringify(yarnLock)
-    );
+    const hash = getHash(isProduction.toString() + packageJSON + packageLock + yarnLock);
+
+    let pj = {};
+    try {
+      pj = JSON.parse(packageJSON);
+    } catch (e) {
+      throw new Error('Invalid package.json');
+    }
 
     let created = false;
     let info = await this.get({ hash });
     if (!info) {
       info = await this.create({
         hash,
-        packageName: `${packageJSON['name']}@${packageJSON['version']}`,
+        packageName: `${pj['name']}@${pj['version']}`,
         packageJSON,
         packageLock,
         yarnLock,
@@ -90,22 +95,16 @@ export class PackageInfoApi extends Api {
   }: {
     hash: string;
     packageName?: string;
-    packageJSON?: Object;
-    packageLock?: Object;
+    packageJSON?: string;
+    packageLock?: string;
     yarnLock?: string;
     isProduction: boolean;
     isNpmModule: boolean;
   }) {
     const date = Date.now();
 
-    const packageJSONS3Key = await this.uploadFile(
-      `packages/${hash}/package.json`,
-      packageJSON && JSON.stringify(packageJSON)
-    );
-    const packageLockS3Key = await this.uploadFile(
-      `packages/${hash}/package-lock.json`,
-      packageLock && JSON.stringify(packageLock)
-    );
+    const packageJSONS3Key = await this.uploadFile(`packages/${hash}/package.json`, packageJSON);
+    const packageLockS3Key = await this.uploadFile(`packages/${hash}/package-lock.json`, packageLock);
     const yarnLockS3Key = await this.uploadFile(`packages/${hash}/yarn.lock`, yarnLock);
 
     const item = await this.packageInfoCollection.insertOne({
