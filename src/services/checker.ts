@@ -73,14 +73,15 @@ export class StartPackageValidation extends Service {
     const s3BucketName = process.env.FileStorage_S3_BUCKET + `-${process.env.FUNCTIONAL_STAGE}`;
 
     return new Promise((resolve, reject) => {
-      const command = [ 'node', '.', cid, packageJSONS3Key || packageName ];
+      const p4 = packageJSONS3Key ? `s3://${packageJSONS3Key}` : packageName;
+      const command = [ 'node', '.', cid, p4 ];
 
       if (packageLockS3Key) {
-        command.push(...[ '--package-lock', packageLockS3Key ]);
+        command.push(...[ '--package-lock', `s3://${packageLockS3Key}` ]);
       }
 
       if (yarnLockS3Key) {
-        command.push(...[ '--yarn-lock', yarnLockS3Key ]);
+        command.push(...[ '--yarn-lock', `s3://${yarnLockS3Key}` ]);
       }
 
       new AWS.ECS({ region }).runTask(
