@@ -26,7 +26,7 @@ export class CreateCacheItems extends Service {
 
 //TODO remove
 @rest({ path: '/getmodulemeta', methods: [ 'post' ] })
-@environment('MODULE_META_EXPIRATION_IN_HOURS', '48')
+@environment('MODULE_META_EXPIRATION_IN_HOURS', '168')
 export class GetModuleMeta extends CorpCheckRestService {
   public async handle(@param modules, @inject(ModuleMetadataCache) moduleMetadataCache: ModuleMetadataCache) {
     const result: MetaObject = {};
