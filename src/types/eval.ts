@@ -1,6 +1,10 @@
 import { Node, PackageMeta } from './info';
 
-export type LogType = 'ERROR' | 'WARNING' | 'INFO';
+export enum LogType {
+  ERROR = 'ERROR',
+  WARNING = 'WARNING',
+  INFO = 'INFO'
+}
 
 export type Log = {
   message: string;
@@ -16,9 +20,9 @@ export type Evaluation = {
 };
 
 //export type Evaluator = ({ data, rule }: { data: Data; rule: any }) => Promise<Evaluation>;
-export type Evaluator = (
-  { node, packageMeta, rule }: { node: Node; packageMeta: PackageMeta; rule: any }
-) => Promise<Evaluation>;
+export type Evaluator<Rule = any> = (
+  { node, packageMeta, rule }: { node: Node; packageMeta: PackageMeta; rule: Rule; depth: number }
+) => Evaluation;
 
 export type Qualification = 'RECOMMENDED' | 'ACCEPTED' | 'REJECTED';
 

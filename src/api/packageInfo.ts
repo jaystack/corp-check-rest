@@ -62,7 +62,7 @@ export class PackageInfoApi extends Api {
       info = await this.create({
         hash,
         packageName: `${packageInfo.name}@${packageInfo.version}`,
-        isProduction: true,
+        isProduction: false,
         isNpmModule: true
       });
       created = true;

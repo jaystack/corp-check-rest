@@ -1,12 +1,12 @@
 import { Service, param, injectable, InjectionScope } from 'functionly';
-import { Node, LicenseRule, PackageMeta, Evaluation, Log } from '../types';
+import { Node, LicenseRule, PackageMeta, Evaluation, Log, Evaluator, LogType } from '../types';
 
 const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule): Log[] => {
   if (licenseRequired && !node.license.type)
     return [
       {
         message: `Missing license`,
-        type: 'ERROR'
+        type: LogType.ERROR
       } as Log
     ];
 
@@ -20,7 +20,7 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
     return [
       {
         message: `Forbidden license: ${node.license.type}`,
-        type: 'ERROR'
+        type: LogType.ERROR
       } as Log
     ];
 
@@ -28,22 +28,19 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
     return [
       {
         message: `Not allowed license: ${node.license.type}`,
-        type: 'ERROR'
+        type: LogType.ERROR
       } as Log
     ];
 
   return [];
 };
 
-@injectable(InjectionScope.Singleton)
-export default class License extends Service {
-  public async handle(@param node: Node, @param rule: LicenseRule): Promise<Evaluation> {
-    const logs = getLogs(node, rule);
-    return {
-      name: 'license',
-      description: '',
-      score: logs.length > 0 ? 0 : 1,
-      logs
-    } as Evaluation;
-  }
-}
+export default (({ node, rule, depth }) => {
+  const logs = getLogs(node, rule);
+  return {
+    name: 'license',
+    description: '',
+    score: logs.length > 0 ? 0 : 1,
+    logs
+  } as Evaluation;
+}) as Evaluator<LicenseRule>;
