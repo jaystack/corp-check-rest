@@ -33,7 +33,7 @@ export class Badge extends Service {
         break;
 
       case evaluationInfo.result.qualification === 'REJECTED':
-        content = await getBase64String(files, '/images/status/corp-check-not-recommended.svg');
+        content = await getBase64String(files, '/images/status/corp-check-rejected.svg');
         break;
 
       default:

@@ -78,6 +78,13 @@ module.exports = {
               context.stage,
               logger
             );
+            await uploadfile(
+              s3,
+              '../content/images/status/corp-check-rejected.svg',
+              'images/status/corp-check-rejected.svg',
+              context.stage,
+              logger
+            );
           }
         }
       }
