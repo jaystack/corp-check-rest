@@ -20,7 +20,7 @@ export class ValidationStart extends Service {
     let { packageInfo, created } = packageInfoFromResult;
     ruleSet = ruleSet || null;
 
-    if (await isExpiredResult({ packageInfo, update: true, force: !created && typeof force !== 'undefined' })) {
+    if (await isExpiredResult({ packageInfo, update: true, force: !created && force })) {
       packageInfo = await packageInfoApi.create(packageInfo);
     }
 

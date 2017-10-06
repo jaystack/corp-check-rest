@@ -43,7 +43,7 @@ export class Validation extends CorpCheckRestService {
       throw new MissingPackageParameters('packageJSON or packageName');
     }
 
-    const evaluationInfo = await validationStart({ force, ruleSet, packageInfoFromResult });
+    const evaluationInfo = await validationStart({ force: !!force, ruleSet, packageInfoFromResult });
 
     return { state: packageInfoFromResult.packageInfo.state, cid: evaluationInfo._id };
   }

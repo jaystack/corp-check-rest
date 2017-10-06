@@ -88,24 +88,30 @@ export class PackageInfoApi extends Api {
     hash,
     packageName,
     packageJSON,
+    packageJSONS3Key,
     packageLock,
+    packageLockS3Key,
     yarnLock,
+    yarnLockS3Key,
     isProduction,
     isNpmModule
   }: {
     hash: string;
     packageName?: string;
     packageJSON?: string;
+    packageJSONS3Key?: string;
     packageLock?: string;
+    packageLockS3Key?: string;
     yarnLock?: string;
+    yarnLockS3Key?: string;
     isProduction: boolean;
     isNpmModule: boolean;
   }) {
     const date = Date.now();
 
-    const packageJSONS3Key = await this.uploadFile(`packages/${hash}/package.json`, packageJSON);
-    const packageLockS3Key = await this.uploadFile(`packages/${hash}/package-lock.json`, packageLock);
-    const yarnLockS3Key = await this.uploadFile(`packages/${hash}/yarn.lock`, yarnLock);
+    packageJSONS3Key = packageJSONS3Key || (await this.uploadFile(`packages/${hash}/package.json`, packageJSON));
+    packageLockS3Key = packageLockS3Key || (await this.uploadFile(`packages/${hash}/package-lock.json`, packageLock));
+    yarnLockS3Key = yarnLockS3Key || (await this.uploadFile(`packages/${hash}/yarn.lock`, yarnLock));
 
     const item = await this.packageInfoCollection.insertOne({
       hash,
@@ -119,7 +125,8 @@ export class PackageInfoApi extends Api {
         date,
         type: 'PENDING'
       },
-      latest: true
+      latest: true,
+      isNpmModule
     });
 
     return await this.get({ hash });
