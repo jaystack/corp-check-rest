@@ -12,23 +12,29 @@ export type PackageInfo = {
 
 export class PackageNotExists extends Error {
   constructor(public name: string) {
-    super();
+    super(`'${name}' npm package not exists`);
   }
 }
 
 export class PackageVersionNotExists extends Error {
   constructor(public name: string, public version: string) {
-    super();
+    super(`'${version}' version not exists for package '${name}'`);
   }
 }
 
 @injectable(InjectionScope.Singleton)
 export class GetNpmInfo extends Service {
   public async handle(@param name, @param version = LATEST_VERSION) {
-    const info: any = await request({
-      uri: `https://registry.npmjs.org/${name.replace('/', '%2F')}`,
-      json: true
-    });
+    let info;
+
+    try {
+      info = await request({
+        uri: `https://registry.npmjs.org/${name.replace('/', '%2F')}`,
+        json: true
+      });
+    } catch (e) {
+      throw new PackageNotExists(name);
+    }
 
     if (info.name !== name) {
       throw new PackageNotExists(name);
