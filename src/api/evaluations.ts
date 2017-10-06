@@ -77,6 +77,7 @@ export class EvaluationsApi extends Api {
         cid: evaluationInfo._id,
         result
       });
+      evaluationInfo.result = result;
     } catch (e) {
       console.log('catch', new Date().toISOString());
       await this.packageInfoApi.updateState({

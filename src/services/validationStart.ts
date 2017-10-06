@@ -11,13 +11,14 @@ export class ValidationStart extends Service {
   public async handle(
     @param force,
     @param ruleSet,
-    @param packageInfoFromResult: { packageInfo: PackageInfo, created: boolean},
+    @param packageInfoFromResult: { packageInfo: PackageInfo; created: boolean },
     @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
     @inject(EvaluationsApi) evaluationsApi: EvaluationsApi,
     @inject(IsExpiredResult) isExpiredResult,
     @inject(StartPackageValidation) startPackageValidation
   ) {
     let { packageInfo, created } = packageInfoFromResult;
+    ruleSet = ruleSet || null;
 
     if (await isExpiredResult({ packageInfo, update: true, force: !created && typeof force !== 'undefined' })) {
       packageInfo = await packageInfoApi.create(packageInfo);
