@@ -91,9 +91,23 @@ export class PopularPackages extends CorpCheckRestService {
     @inject(EvaluationsApi) evaluationsApi: EvaluationsApi
   ) {
     const evaluations = await evaluationsApi.getByNames(popularPackageNames);
-    const packageInfoIds = evaluations.map(({ packageInfoId }) => packageInfoId);
+    const duplicateFilteredEvaluations = evaluations.reduce((acc, evaluation) => {
+      const precedent = acc.find(
+        precedent => precedent.result.rootEvaluation.nodeName === evaluation.result.rootEvaluation.nodeName
+      );
+      if (!precedent) return [ ...acc, evaluation ];
+      return precedent.result.rootEvaluation.nodeVersion > evaluation.result.rootEvaluation.nodeVersion
+        ? acc
+        : [
+            ...acc.filter(
+              precedent => precedent.result.rootEvaluation.nodeName === evaluation.result.rootEvaluation.nodeName
+            ),
+            evaluation
+          ];
+    }, []);
+    const packageInfoIds = duplicateFilteredEvaluations.map(({ packageInfoId }) => packageInfoId);
     const packageInfos = await packageInfoApi.getByIds(packageInfoIds);
-    return evaluations.map(
+    return duplicateFilteredEvaluations.map(
       (
         {
           _id: cid,
