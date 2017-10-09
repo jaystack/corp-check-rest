@@ -6,10 +6,12 @@ import { popularPackageNames } from '../consts';
 @rest({ path: '/popular-packages', methods: [ 'post' ] })
 export class CheckPopularPackages extends CorpCheckRestService {
   public async handle(@inject(Validation) validate) {
-    for (const packageName of popularPackageNames) {
-      console.log(packageName);
-      validate.invoke({ packageName });
-    }
+    await Promise.all(
+      popularPackageNames.map(async packageName => {
+        console.log(packageName);
+        return await validate.invoke({ packageName });
+      })
+    );
   }
 }
 
