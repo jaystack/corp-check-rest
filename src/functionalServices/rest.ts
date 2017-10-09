@@ -15,8 +15,8 @@ import { CorpCheckRestService } from './corpCheckRestService';
 
 export class MissingPackageParameters extends Error {}
 
-@injectable(InjectionScope.Singleton)
 @rest({ path: '/validation', methods: [ 'post' ], anonymous: true, cors: true })
+@injectable(InjectionScope.Singleton)
 export class Validation extends CorpCheckRestService {
   public async handle(
     @param packageName,
