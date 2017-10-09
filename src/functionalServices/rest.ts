@@ -108,10 +108,15 @@ export class PopularPackages extends CorpCheckRestService {
     }, []);
     const packageInfoIds = duplicateFilteredEvaluations.map(({ packageInfoId }) => packageInfoId);
     const packageInfos = await packageInfoApi.getByIds(packageInfoIds);
+    const getRelatedPackageInfo = packageInfoId =>
+      packageInfos.find(packageInfo => packageInfo._id.toHexString() === packageInfoId.toHexString()) || {
+        state: null
+      };
     return duplicateFilteredEvaluations.map(
       (
         {
           _id: cid,
+          packageInfoId,
           result: { qualification, rootEvaluation: { nodeName: name, nodeVersion: version, nodeScore: score } }
         },
         i
@@ -119,7 +124,7 @@ export class PopularPackages extends CorpCheckRestService {
         cid,
         name,
         version,
-        state: packageInfos[i].state,
+        state: getRelatedPackageInfo(packageInfoId).state,
         qualification,
         score
       })
