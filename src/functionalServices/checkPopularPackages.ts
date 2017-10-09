@@ -5,7 +5,9 @@ import { popularPackageNames } from '../consts';
 
 export class CheckPopularDependencies extends CorpCheckRestService {
   public async handle(@inject(Validation) validate) {
+    console.log(validate)
     for (const packageName of popularPackageNames) {
+      console.log(packageName)
       await validate({ packageName });
     }
   }
