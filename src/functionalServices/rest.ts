@@ -93,28 +93,21 @@ export class PopularPackages extends CorpCheckRestService {
     const evaluations = await evaluationsApi.getByNames(popularPackageNames);
     const packageInfoIds = evaluations.map(({ packageInfoId }) => packageInfoId);
     const packageInfos = await packageInfoApi.getByIds(packageInfoIds);
-    return evaluations.reduce(
+    return evaluations.map(
       (
-        acc,
         {
           _id: cid,
           result: { qualification, rootEvaluation: { nodeName: name, nodeVersion: version, nodeScore: score } }
         },
         i
-      ) => {
-        return {
-          ...acc,
-          [name]: {
-            cid,
-            name,
-            version,
-            state: packageInfos[i].state,
-            qualification,
-            score
-          }
-        };
-      },
-      {}
+      ) => ({
+        cid,
+        name,
+        version,
+        state: packageInfos[i].state,
+        qualification,
+        score
+      })
     );
   }
 }
