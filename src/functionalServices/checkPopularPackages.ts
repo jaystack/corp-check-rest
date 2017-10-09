@@ -4,7 +4,7 @@ import { Validation } from './rest';
 import { popularPackageNames } from '../consts';
 
 @rest({ path: '/popular-packages', methods: [ 'post' ] })
-export class CheckPopularDependencies extends CorpCheckRestService {
+export class CheckPopularPackages extends CorpCheckRestService {
   public async handle(@inject(Validation) validate) {
     for (const packageName of popularPackageNames) {
       console.log(packageName);
@@ -13,4 +13,4 @@ export class CheckPopularDependencies extends CorpCheckRestService {
   }
 }
 
-export const checkPopularDependencies = {}//CheckPopularDependencies.createInvoker();
+export const checkPopularPackages = CheckPopularPackages.createInvoker();
