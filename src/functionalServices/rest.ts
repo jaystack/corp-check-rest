@@ -9,6 +9,7 @@ import { FileStorage } from '../stores/s3filestorages';
 import { PackageInfoApi } from '../api/packageInfo';
 import { EvaluationsApi } from '../api/evaluations';
 import { PackageInfo, EvaluationInfo } from '../types';
+import { popularPackageNames } from '../consts';
 
 import { CorpCheckRestService } from './corpCheckRestService';
 
@@ -83,6 +84,41 @@ export class Package extends CorpCheckRestService {
   }
 }
 
+@rest({ path: '/popular-packages', methods: [ 'get' ], anonymous: true, cors: true })
+export class PopularPackages extends CorpCheckRestService {
+  public async handle(
+    @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
+    @inject(EvaluationsApi) evaluationsApi: EvaluationsApi
+  ) {
+    const evaluations = await evaluationsApi.getByNames(popularPackageNames);
+    const packageInfoIds = evaluations.map(({ packageInfoId }) => packageInfoId);
+    const packageInfos = await packageInfoApi.getByIds(packageInfoIds);
+    return evaluations.reduce(
+      (
+        acc,
+        {
+          _id: cid,
+          result: { qualification, rootEvaluation: { nodeName: name, nodeVersion: version, nodeScore: score } }
+        },
+        i
+      ) => {
+        return {
+          ...acc,
+          [name]: {
+            cid,
+            name,
+            version,
+            state: packageInfos[i].state,
+            qualification,
+            score
+          }
+        };
+      },
+      {}
+    );
+  }
+}
+
 @rest({ path: '/badge', methods: [ 'get' ], anonymous: true, cors: true })
 export class BadgeService extends CorpCheckRestService {
   public async handle(
@@ -138,5 +174,6 @@ export class Suggestion extends CorpCheckRestService {
 
 export const validation = Validation.createInvoker();
 export const packageInfo = Package.createInvoker();
+export const popularPackages = PopularPackages.createInvoker();
 export const getSuggestions = Suggestion.createInvoker();
 export const badge = BadgeService.createInvoker();

@@ -84,6 +84,10 @@ export class PackageInfoApi extends Api {
     return await this.packageInfoCollection.findOne<PackageInfo>({ _id });
   }
 
+  public async getByIds(ids: any[]): Promise<PackageInfo[]> {
+    return await this.packageInfoCollection.find({ _id: { $in: ids } }).toArray();
+  }
+
   public async create({
     hash,
     packageName,

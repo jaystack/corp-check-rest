@@ -30,6 +30,10 @@ export class EvaluationsApi extends Api {
     return await this.evaluations.findOne<EvaluationInfo>({ _id: cid });
   }
 
+  public async getByNames(names: string[]): Promise<EvaluationInfo[]> {
+    return await this.evaluations.find({ 'result.rootEvaluation.nodeName': { $in: names } }).toArray();
+  }
+
   public async create({ packageInfoId, ruleSet }) {
     const ruleSetHash = getHash(JSON.stringify(ruleSet));
     const date = Date.now();

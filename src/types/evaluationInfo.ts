@@ -2,7 +2,7 @@ import { FinalEvaluation } from './eval';
 
 export type EvaluationInfo = {
   _id: any;
-  packageInfoId: string;
+  packageInfoId: any;
   date: number;
   ruleSet: Object;
   ruleSetHash: string;
