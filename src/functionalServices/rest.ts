@@ -1,4 +1,4 @@
-import { rest, aws, param, inject, use } from 'functionly';
+import { rest, aws, param, inject, use, injectable, InjectionScope } from 'functionly';
 import { stringify } from 'querystring';
 import request = require('request-promise-native');
 import { StartPackageValidation, IsExpiredResult } from '../services/checker';
@@ -15,6 +15,7 @@ import { CorpCheckRestService } from './corpCheckRestService';
 
 export class MissingPackageParameters extends Error {}
 
+@injectable(InjectionScope.Singleton)
 @rest({ path: '/validation', methods: [ 'post' ], anonymous: true, cors: true })
 export class Validation extends CorpCheckRestService {
   public async handle(
