@@ -112,23 +112,25 @@ export class PopularPackages extends CorpCheckRestService {
       packageInfos.find(packageInfo => packageInfo._id.toHexString() === packageInfoId.toHexString()) || {
         state: null
       };
-    return duplicateFilteredEvaluations.map(
-      (
-        {
-          _id: cid,
-          packageInfoId,
-          result: { qualification, rootEvaluation: { nodeName: name, nodeVersion: version, nodeScore: score } }
-        },
-        i
-      ) => ({
-        cid,
-        name,
-        version,
-        state: getRelatedPackageInfo(packageInfoId).state,
-        qualification,
-        score
-      })
-    );
+    return duplicateFilteredEvaluations
+      .map(
+        (
+          {
+            _id: cid,
+            packageInfoId,
+            result: { qualification, rootEvaluation: { nodeName: name, nodeVersion: version, nodeScore: score } }
+          },
+          i
+        ) => ({
+          cid,
+          name,
+          version,
+          state: getRelatedPackageInfo(packageInfoId).state,
+          qualification,
+          score
+        })
+      )
+      .sort((a, b) => b.score - a.score);
   }
 }
 
