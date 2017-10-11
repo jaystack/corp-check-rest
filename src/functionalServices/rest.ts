@@ -101,7 +101,7 @@ export class PopularPackages extends CorpCheckRestService {
         ? acc
         : [
             ...acc.filter(
-              precedent => precedent.result.rootEvaluation.nodeName === evaluation.result.rootEvaluation.nodeName
+              precedent => precedent.result.rootEvaluation.nodeName !== evaluation.result.rootEvaluation.nodeName
             ),
             evaluation
           ];
