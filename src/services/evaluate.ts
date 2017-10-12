@@ -18,7 +18,7 @@ import npmScores from '../evaluators/npmScores';
 const A = 1;
 
 const qualificate = (finalScore: number): Qualification => {
-  if (finalScore >= 0.8) return 'RECOMMENDED';
+  if (finalScore >= 0.5) return 'RECOMMENDED';
   else if (finalScore > 0 && finalScore < 0.5) return 'ACCEPTED';
   else return 'REJECTED';
 };
