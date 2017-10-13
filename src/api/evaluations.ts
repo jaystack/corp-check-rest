@@ -67,7 +67,7 @@ export class EvaluationsApi extends Api {
     console.log('3.1', new Date().toISOString());
     const result = await this.evaluateService({
       data,
-      ruleSet: await this.getRuleSet({ ruleSet: evaluationInfo.ruleSet })
+      ruleSet: await this.getRuleSet({ ruleSet: JSON.parse(evaluationInfo.ruleSet) })
     });
     try {
       console.log('3.2', new Date().toISOString());
