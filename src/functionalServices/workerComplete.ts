@@ -34,6 +34,7 @@ export class Complete extends CorpCheckRestService {
       return;
     }
     console.log('3', new Date().toISOString());
+    console.log('evaluationInfo.ruleSet:', evaluationInfo.ruleSet);
     await evaluationsApi.evaluate({
       evaluationInfo,
       data
