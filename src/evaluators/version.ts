@@ -1,5 +1,6 @@
 import { Service, param, injectable, InjectionScope } from 'functionly';
-import { Info as Data, VersionRule, Node, Evaluation, Log, Evaluator, LogType } from '../types';
+import { Info as Data, Node, Evaluation, Log, Evaluator, LogType } from 'corp-check-core';
+import { VersionRule } from '../types';
 
 const getLogs = (node: Node, depth: number, { minVersion, isRigorous, rigorousDepth }: VersionRule) => {
   if (!minVersion) return [];

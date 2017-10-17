@@ -1,4 +1,4 @@
-import { FinalEvaluation } from './eval';
+import { FinalEvaluation } from 'corp-check-core';
 
 export type EvaluationInfo = {
   _id: any;

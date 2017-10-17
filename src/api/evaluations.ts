@@ -3,7 +3,7 @@ import { Evaluations } from '../stores/mongoCollections';
 import { GetNpmInfo } from '../services/npm';
 import { generate } from 'shortid';
 import * as getHash from 'hash-sum';
-import { EvaluationInfo } from '../types';
+import { EvaluationInfo, StateType } from '../types';
 import { PackageInfoApi } from './packageInfo';
 import { Evaluate } from '../services/evaluate';
 import { GetRuleSet } from '../services/defaultRuleSet';
@@ -31,7 +31,9 @@ export class EvaluationsApi extends Api {
   }
 
   public async getByNames(names: string[]): Promise<EvaluationInfo[]> {
-    return await this.evaluations.find<EvaluationInfo>({ 'result.rootEvaluation.nodeName': { $in: names }, ruleSet: null }).toArray();
+    return await this.evaluations
+      .find<EvaluationInfo>({ 'result.rootEvaluation.nodeName': { $in: names }, ruleSet: null })
+      .toArray();
   }
 
   public async create({ packageInfoId, ruleSet }) {
@@ -74,7 +76,7 @@ export class EvaluationsApi extends Api {
       await this.packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
         meta: data,
-        type: 'SUCCEEDED'
+        type: StateType.SUCCEEDED
       });
       console.log('3.3', new Date().toISOString());
       await this.updateResult({
@@ -87,7 +89,7 @@ export class EvaluationsApi extends Api {
       await this.packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
         meta: { message: 'error in evaluate' },
-        type: 'FAILED'
+        type: StateType.FAILED
       });
       throw e;
     } finally {

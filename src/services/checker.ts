@@ -2,7 +2,7 @@ import { Service, param, injectable, inject, InjectionScope, environment, getFun
 import { PackageInfoApi } from '../api/packageInfo';
 import { generate } from 'shortid';
 import * as moment from 'moment';
-import { PackageInfo } from '../types';
+import { PackageInfo, StateType } from '../types';
 import * as AWS from 'aws-sdk';
 
 @injectable(InjectionScope.Singleton)
@@ -26,9 +26,9 @@ export class IsExpiredResult extends Service {
 
     if (
       force ||
-      packageInfo.state.type === 'FAILED' ||
-      (packageInfo.state.type === 'PENDING' && minutes > pendingMaxMinutes) ||
-      (packageInfo.state.type === 'SUCCEEDED' && hours > successMaxHours)
+      packageInfo.state.type === StateType.FAILED ||
+      (packageInfo.state.type === StateType.PENDING && minutes > pendingMaxMinutes) ||
+      (packageInfo.state.type === StateType.SUCCEEDED && hours > successMaxHours)
     ) {
       if (force || update) {
         await packageInfoApi.updateMany(

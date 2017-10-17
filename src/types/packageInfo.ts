@@ -1,3 +1,9 @@
+export enum StateType {
+  PENDING = 'PENDING',
+  SUCCEEDED = 'SUCCEEDED',
+  FAILED = 'FAILED'
+}
+
 export type PackageInfo = {
   _id: any;
   hash: string;
@@ -9,7 +15,7 @@ export type PackageInfo = {
   date: number;
   state: {
     date: number;
-    type: 'PENDING' | 'SUCCEEDED' | 'FAILED';
+    type: StateType;
   };
   latest: boolean;
   isNpmModule: boolean;
