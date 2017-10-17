@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.123.0",
-    "functionly": "0.0.17",
+    "functionly": "0.0.18",
     "hash-sum": "^1.0.2",
     "moment": "^2.18.1",
     "ramda": "^0.24.1",

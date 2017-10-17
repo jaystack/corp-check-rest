@@ -85,7 +85,7 @@ export class PackageInfoApi extends Api {
   }
 
   public async getByIds(ids: any[]): Promise<PackageInfo[]> {
-    return await this.packageInfoCollection.find({ _id: { $in: ids } }).toArray();
+    return await this.packageInfoCollection.find<PackageInfo>({ _id: { $in: ids } }).toArray();
   }
 
   public async create({
@@ -150,7 +150,7 @@ export class PackageInfoApi extends Api {
     return { updated };
   }
 
-  public async updateMany(filter, update) {
+  public async updateMany(filter, update): Promise<any> {
     return await this.packageInfoCollection.updateMany(filter, {
       $set: update
     });

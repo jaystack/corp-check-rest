@@ -31,7 +31,7 @@ export class EvaluationsApi extends Api {
   }
 
   public async getByNames(names: string[]): Promise<EvaluationInfo[]> {
-    return await this.evaluations.find({ 'result.rootEvaluation.nodeName': { $in: names }, ruleSet: null }).toArray();
+    return await this.evaluations.find<EvaluationInfo>({ 'result.rootEvaluation.nodeName': { $in: names }, ruleSet: null }).toArray();
   }
 
   public async create({ packageInfoId, ruleSet }) {

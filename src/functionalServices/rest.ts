@@ -27,9 +27,7 @@ export class Validation extends CorpCheckRestService {
     @param isProduction,
     @param ruleSet,
     @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
-    @inject(ValidationStart) validationStart,
-    //TODO
-    @inject(FileStorage) files: FileStorage
+    @inject(ValidationStart) validationStart
   ) {
     let packageInfoFromResult: { packageInfo: PackageInfo; created: boolean };
     if (packageJSON) {
@@ -142,9 +140,7 @@ export class BadgeService extends CorpCheckRestService {
     @param version,
     @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
     @inject(ValidationStart) validationStart,
-    @inject(Badge) badge,
-    //TODO
-    @inject(FileStorage) files: FileStorage
+    @inject(Badge) badge
   ) {
     const packageName = `${scope ? `@${scope}/` : ''}${name}@${version || 'latest'}`;
     const packageInfoFromResult = await packageInfoApi.fromPackageName({ packageName });
