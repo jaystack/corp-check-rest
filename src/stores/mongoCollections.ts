@@ -1,4 +1,4 @@
-import { DynamoTable, MongoCollection, MongoConnection, mongoConnection } from 'functionly';
+import { DynamoTable, MongoCollection, MongoConnection } from 'functionly';
 import { injectable, mongoCollection, inject, container, environment, InjectionScope } from 'functionly';
 import { KMSApi } from '../services/aws/kms';
 
@@ -43,7 +43,7 @@ export class KMSResolveMongoConnection extends MongoConnection {
   }
 }
 
-/* chance default mongo connection */
+/* change default mongo connection */
 container.registerType(MongoConnection, KMSResolveMongoConnection);
 
 /* Collections */
