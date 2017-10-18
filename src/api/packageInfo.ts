@@ -3,7 +3,7 @@ import { PackageInfoCollection } from '../stores/mongoCollections';
 import { GetNpmInfo } from '../services/npm';
 import { FileStorage } from '../stores/s3filestorages';
 import * as getHash from 'hash-sum';
-import { PackageInfo } from '../types';
+import { PackageInfo, StateType } from '../types';
 
 const NPM_PACKAGE_NAME_PATTERN = /^((@([^@]+)\/)?([^@]+))(@(.*))?$/;
 
@@ -127,7 +127,7 @@ export class PackageInfoApi extends Api {
       date,
       state: {
         date,
-        type: 'PENDING'
+        type: StateType.PENDING
       },
       latest: true,
       isNpmModule

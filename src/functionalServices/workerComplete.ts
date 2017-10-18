@@ -6,6 +6,8 @@ import { PackageInfoApi } from '../api/packageInfo';
 import { EvaluationsApi } from '../api/evaluations';
 import { CreateCacheItems } from './moduleMetaCache';
 
+import { StateType } from '../types';
+
 //TODO remove
 @rest({ path: '/complete', methods: [ 'post' ] })
 export class Complete extends CorpCheckRestService {
@@ -29,7 +31,7 @@ export class Complete extends CorpCheckRestService {
       await packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
         meta: error,
-        type: 'FAILED'
+        type: StateType.FAILED
       });
       return;
     }

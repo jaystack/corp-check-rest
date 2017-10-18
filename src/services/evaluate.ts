@@ -4,13 +4,13 @@ import {
   Node,
   Meta,
   PackageMeta,
-  RuleSet,
   Qualification,
   Evaluator,
   Evaluation,
   NodeEvaluation,
   FinalEvaluation
-} from '../types';
+} from 'corp-check-core';
+import { RuleSet } from '../types';
 import license from '../evaluators/license';
 import version from '../evaluators/version';
 import npmScores from '../evaluators/npmScores';
@@ -18,9 +18,9 @@ import npmScores from '../evaluators/npmScores';
 const A = 1;
 
 const qualificate = (finalScore: number): Qualification => {
-  if (finalScore >= 0.5) return 'RECOMMENDED';
-  else if (finalScore > 0 && finalScore < 0.5) return 'ACCEPTED';
-  else return 'REJECTED';
+  if (finalScore >= 0.5) return Qualification.RECOMMENDED;
+  else if (finalScore > 0 && finalScore < 0.5) return Qualification.ACCEPTED;
+  else return Qualification.REJECTED;
 };
 
 const weightFunction = (score: number): number => Math.sqrt(A * score);

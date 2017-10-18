@@ -1,7 +1,8 @@
 import { Service, param, inject, injectable, InjectionScope } from 'functionly';
 import { StartPackageValidation, IsExpiredResult } from '../services/checker';
 
-import { NodeEvaluation, PackageInfo } from '../types';
+import { NodeEvaluation, Qualification } from 'corp-check-core';
+import { PackageInfo, StateType } from '../types';
 
 import { PackageInfoApi } from '../api/packageInfo';
 import { EvaluationsApi } from '../api/evaluations';
@@ -29,7 +30,7 @@ export class ValidationStart extends Service {
     if (!evaluationInfo) {
       evaluationInfo = await evaluationsApi.create({ packageInfoId, ruleSet });
 
-      if (packageInfo.state.type === 'PENDING' && process.env.FUNCTIONAL_ENVIRONMENT !== 'local') {
+      if (packageInfo.state.type === StateType.PENDING && process.env.FUNCTIONAL_ENVIRONMENT !== 'local') {
         await startPackageValidation({
           packageName: packageInfo.packageName,
           packageJSONS3Key: packageInfo.packageJSONS3Key,
@@ -41,7 +42,7 @@ export class ValidationStart extends Service {
       }
     }
 
-    if (packageInfo.state.type === 'SUCCEEDED' && !evaluationInfo.result) {
+    if (packageInfo.state.type === StateType.SUCCEEDED && !evaluationInfo.result) {
       await evaluationsApi.evaluate({
         evaluationInfo,
         data: packageInfo.meta

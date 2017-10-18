@@ -1,5 +1,6 @@
 import { Service, param, injectable, InjectionScope } from 'functionly';
-import { Node, LicenseRule, PackageMeta, Evaluation, Log, Evaluator, LogType } from '../types';
+import { Node, PackageMeta, Evaluation, Log, Evaluator, LogType } from 'corp-check-core';
+import { LicenseRule } from '../types';
 
 const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule): Log[] => {
   if (licenseRequired && !node.license.type)

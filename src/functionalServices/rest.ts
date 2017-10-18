@@ -8,7 +8,7 @@ import { FileStorage } from '../stores/s3filestorages';
 
 import { PackageInfoApi } from '../api/packageInfo';
 import { EvaluationsApi } from '../api/evaluations';
-import { PackageInfo, EvaluationInfo } from '../types';
+import { PackageInfo, EvaluationInfo, StateType } from '../types';
 import { popularPackageNames } from '../consts';
 
 import { CorpCheckRestService } from './corpCheckRestService';
