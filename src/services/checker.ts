@@ -59,7 +59,8 @@ export class StartPackageValidation extends Service {
     @inject(TaskChannel) taskChannel: TaskChannel
   ) {
     taskChannel.assertQueue();
-    taskChannel.sendToQueue(
+    console.log('taskChannel.sendToQueue');
+    const result = taskChannel.sendToQueue(
       new Buffer(
         JSON.stringify({
           cid,
@@ -70,5 +71,8 @@ export class StartPackageValidation extends Service {
         })
       )
     );
+    console.log('result', result);
+
+    return new Promise(r => setTimeout(r, 300));
   }
 }
