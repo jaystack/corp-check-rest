@@ -188,3 +188,28 @@ export const packageInfo = Package.createInvoker();
 export const popularPackages = PopularPackages.createInvoker();
 export const getSuggestions = Suggestion.createInvoker();
 export const badge = BadgeService.createInvoker();
+
+@rest({ path: '/stresstest', methods: [ 'post' ] })
+export class StressTest extends CorpCheckRestService {
+  public async handle(@param count, @param packageName, @inject(StartPackageValidation) startPackageValidation) {
+    const _count = count || 10;
+    for (let i = 0; i < _count; i++) {
+      await startPackageValidation({
+        packageName: packageName || 'express',
+        cid: '1'
+      });
+      console.log(i)
+    }
+
+    return {
+      status: 200,
+      data: {
+        started: true,
+        count,
+        packageName
+      }
+    };
+  }
+}
+
+export const test = StressTest.createInvoker();
