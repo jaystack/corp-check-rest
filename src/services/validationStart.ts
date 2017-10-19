@@ -30,7 +30,7 @@ export class ValidationStart extends Service {
     if (!evaluationInfo) {
       evaluationInfo = await evaluationsApi.create({ packageInfoId, ruleSet });
 
-      if (packageInfo.state.type === StateType.PENDING && process.env.FUNCTIONAL_ENVIRONMENT !== 'local') {
+      if (packageInfo.state.type === StateType.PENDING) {
         await startPackageValidation({
           packageName: packageInfo.packageName,
           packageJSONS3Key: packageInfo.packageJSONS3Key,
