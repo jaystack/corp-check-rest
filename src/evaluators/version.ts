@@ -1,20 +1,31 @@
 import { Service, param, injectable, InjectionScope } from 'functionly';
-import { Info as Data, Node, Evaluation, Log, Evaluator, LogType } from 'corp-check-core';
-import { VersionRule } from '../types';
+import { Info as Data, Node, Evaluation, Log, LogType } from 'corp-check-core';
+import { Evaluator, VersionRule } from '../types';
 
-const getLogs = (node: Node, depth: number, { minVersion, isRigorous, rigorousDepth }: VersionRule) => {
+const getVersionLogs = (node: Node, depth: number, { minVersion, isRigorous, rigorousDepth }: VersionRule): Log[] => {
   if (!minVersion) return [];
   if (minVersion && node.version >= minVersion) return [];
   return [
     {
       message: `Unstable version: ${node.version}`,
       type: isRigorous && (!Number.isFinite(rigorousDepth) || depth <= rigorousDepth) ? LogType.ERROR : LogType.WARNING
-    } as Log
+    }
   ];
 };
 
-export default (({ node, rule, depth }) => {
-  const logs = getLogs(node, depth, rule);
+const getUnknownPackageLogs = (unknownPackages: string[]): Log[] =>
+  unknownPackages.map(name => ({
+    type: LogType.WARNING,
+    message: `Unknown package: ${name}`
+  }));
+
+const getLogs = (node: Node, unknownPackages: string[], depth: number, rule: VersionRule): Log[] => {
+  const versionLogs = getVersionLogs(node, depth, rule);
+  return depth === 0 ? [ ...getUnknownPackageLogs(unknownPackages), ...versionLogs ] : versionLogs;
+};
+
+export default (({ node, rule, unknownPackages, depth }) => {
+  const logs = getLogs(node, unknownPackages, depth, rule);
   return {
     name: 'version',
     description: '',

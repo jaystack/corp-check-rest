@@ -1,6 +1,6 @@
 import { Service, param, injectable, InjectionScope } from 'functionly';
-import { Node, PackageMeta, Evaluation, Log, LogType, Evaluator } from 'corp-check-core';
-import { NpmScoresRule } from '../types';
+import { Node, PackageMeta, Evaluation, Log, LogType } from 'corp-check-core';
+import { Evaluator, NpmScoresRule } from '../types';
 
 const getPercentage = (score: number): string => (Number.isFinite(score) ? Math.round(score * 100) + '%' : 'unknown');
 const getLogType = (value: number): LogType => (value < 0.5 ? LogType.WARNING : LogType.INFO);
