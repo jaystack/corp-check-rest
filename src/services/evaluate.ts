@@ -5,12 +5,11 @@ import {
   Meta,
   PackageMeta,
   Qualification,
-  Evaluator,
   Evaluation,
   NodeEvaluation,
   FinalEvaluation
 } from 'corp-check-core';
-import { RuleSet } from '../types';
+import { Evaluator, RuleSet } from '../types';
 import license from '../evaluators/license';
 import version from '../evaluators/version';
 import npmScores from '../evaluators/npmScores';
@@ -29,12 +28,25 @@ const getNodeScore = (selfScore: number, dependencyScores: number[]): number => 
   return Math.min(selfScore, ...dependencyScores.map(weightFunction));
 };
 
-const evaluate = (evaluators: Evaluator[], rules: any[], meta: Meta, node: Node, depth: number = 0): NodeEvaluation => {
+const evaluate = (
+  evaluators: Evaluator[],
+  rules: any[],
+  meta: Meta,
+  node: Node,
+  unknownPackages: string[] = [],
+  depth: number = 0
+): NodeEvaluation => {
   const evaluations = evaluators.map((evaluator, i) =>
-    evaluator({ node, packageMeta: meta[node.name] || ({} as PackageMeta), rule: rules[i] || {}, depth })
+    evaluator({
+      node,
+      packageMeta: meta[node.name] || ({} as PackageMeta),
+      rule: rules[i] || {},
+      unknownPackages,
+      depth
+    })
   );
   const dependencyEvaluations = node.dependencies.map(dependency =>
-    evaluate(evaluators, rules, meta, dependency, depth + 1)
+    evaluate(evaluators, rules, meta, dependency, unknownPackages, depth + 1)
   );
   const selfScore = evaluations.reduce((acc, { score }) => acc * score, 1);
   return {
@@ -52,7 +64,7 @@ export class Evaluate extends Service {
     console.log('ruleSet:', ruleSet);
     const evaluators: Evaluator[] = [ license, version, npmScores ];
     const rules = [ ruleSet.license, ruleSet.version, ruleSet.npmScores ];
-    const rootEvaluation = evaluate(evaluators, rules, data.meta, data.tree);
+    const rootEvaluation = evaluate(evaluators, rules, data.meta, data.tree, data.unknownPackages);
     return {
       rootEvaluation,
       qualification: qualificate(rootEvaluation.nodeScore)
