@@ -8,5 +8,5 @@
     "main": "./lib/src/index.js",
     "deployTarget": "aws",
     "localPort": 3000,
-    "stage": "dev"
+    "stage": "local"
 }

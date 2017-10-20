@@ -3,16 +3,17 @@ import { RabbitConnection, RabbitChannel, rabbitChannel } from '../services/aws/
 import { injectable, mongoCollection, inject, container, environment, InjectionScope } from 'functionly';
 
 export const STAGE_ENDPOINTS = {
-    dev:
-      'AQICAHjLPCiyfkkMKPgAeOmVYE2S22YSQdPPXzuq04fafcsrmgHUxgfLsea4zkpvv5R4F9FqAAAApDCBoQYJKoZIhvcNAQcGoIGTMIGQAgEAMIGKBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDA24DY96eV3qAkD/QwIBEIBdr7Yd6A/Gh5uRMRAeOrKW/7uY1J91rRyi+dEqpU0BY35vwH4Rr13cB1FL6CvFWJy4gODZXHrLNIMpc4bV+Lp3V4eVMSPSvVf+FG9rLFFv66nhXQLLrAVxtOFGYpqa',
-    stage:
-      'AQICAHieI8COkiRibR7UT7cKVSNHX3UIf6QC6q2fr9NI+KiohQFhtiBIzIczEHFElbsA4H9GAAAApjCBowYJKoZIhvcNAQcGoIGVMIGSAgEAMIGMBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDMQSWcrzks3DFyYJAAIBEIBfDn+lN6PB0PYpprLk5jUV/wbH0I9TZgahucUHPypGRW49FHMmwh3kT/7KXv6PObf7AFkeZUsJJZOs1xaGAekk97Iu1krJd5NH/v5oGnq3vhmUX+HPZHjyDMYte31lqHo=',
-    prod:
-      'AQICAHi0wVEzIAaq+zvhiv+TiZtDf3FSEjRPpFsgq5nTlUqjhgEn8J+aQTJiujzQU+7Uexh6AAAAoDCBnQYJKoZIhvcNAQcGoIGPMIGMAgEAMIGGBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDAeBWdbiOhUgdgy7TgIBEIBZrwaUAN04RTnGmOSs/vc11bVkdt0ahVmHtnOZKo7Bg5iRX+idzZNjUxuGFT9QtRoDWSBWSxC1QF2i0ySyMOLrtVZr9dAykvYRHsjL45JzKapN8qqq395B8sc=',
-    default: ''
-  };
-  export const DEFAULT_RABBIT_ENDPOINT = 'amqp://localhost:5672';
-  
+  local: 'amqp://localhost:5672',
+  dev:
+    'AQICAHjLPCiyfkkMKPgAeOmVYE2S22YSQdPPXzuq04fafcsrmgHUxgfLsea4zkpvv5R4F9FqAAAApDCBoQYJKoZIhvcNAQcGoIGTMIGQAgEAMIGKBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDA24DY96eV3qAkD/QwIBEIBdr7Yd6A/Gh5uRMRAeOrKW/7uY1J91rRyi+dEqpU0BY35vwH4Rr13cB1FL6CvFWJy4gODZXHrLNIMpc4bV+Lp3V4eVMSPSvVf+FG9rLFFv66nhXQLLrAVxtOFGYpqa',
+  stage:
+    'AQICAHieI8COkiRibR7UT7cKVSNHX3UIf6QC6q2fr9NI+KiohQFhtiBIzIczEHFElbsA4H9GAAAApjCBowYJKoZIhvcNAQcGoIGVMIGSAgEAMIGMBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDMQSWcrzks3DFyYJAAIBEIBfDn+lN6PB0PYpprLk5jUV/wbH0I9TZgahucUHPypGRW49FHMmwh3kT/7KXv6PObf7AFkeZUsJJZOs1xaGAekk97Iu1krJd5NH/v5oGnq3vhmUX+HPZHjyDMYte31lqHo=',
+  prod:
+    'AQICAHi0wVEzIAaq+zvhiv+TiZtDf3FSEjRPpFsgq5nTlUqjhgEn8J+aQTJiujzQU+7Uexh6AAAAoDCBnQYJKoZIhvcNAQcGoIGPMIGMAgEAMIGGBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDAeBWdbiOhUgdgy7TgIBEIBZrwaUAN04RTnGmOSs/vc11bVkdt0ahVmHtnOZKo7Bg5iRX+idzZNjUxuGFT9QtRoDWSBWSxC1QF2i0ySyMOLrtVZr9dAykvYRHsjL45JzKapN8qqq395B8sc=',
+  default: ''
+};
+export const DEFAULT_RABBIT_ENDPOINT = 'amqp://localhost:5672';
+
 /* KMS resolve connection */
 @injectable(InjectionScope.Singleton)
 export class KMSResolveRabbitConnection extends RabbitConnection {

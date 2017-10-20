@@ -1,4 +1,4 @@
-import { rest, aws, param, inject, use, injectable, InjectionScope } from 'functionly';
+import { rest, aws, param, inject, use, injectable, InjectionScope, environment } from 'functionly';
 import { stringify } from 'querystring';
 import request = require('request-promise-native');
 import { StartPackageValidation, IsExpiredResult } from '../services/checker';
@@ -17,6 +17,7 @@ export class MissingPackageParameters extends Error {}
 
 @injectable(InjectionScope.Singleton)
 @rest({ path: '/validation', methods: [ 'post' ], anonymous: true, cors: true })
+@environment('PERSIST_VALIDATION_BINARIES', '0')
 export class Validation extends CorpCheckRestService {
   public async handle(
     @param packageName,
@@ -35,7 +36,8 @@ export class Validation extends CorpCheckRestService {
         packageJSON,
         packageLock,
         yarnLock,
-        isProduction: !!isProduction
+        isProduction: !!isProduction,
+        persistBinaries: process.env.PERSIST_VALIDATION_BINARIES === '1'
       });
     } else if (packageName) {
       packageInfoFromResult = await packageInfoApi.fromPackageName({ packageName });
@@ -43,7 +45,14 @@ export class Validation extends CorpCheckRestService {
       throw new MissingPackageParameters('packageJSON or packageName');
     }
 
-    const evaluationInfo = await validationStart({ force: !!force, ruleSet, packageInfoFromResult });
+    const evaluationInfo = await validationStart({
+      force: !!force,
+      ruleSet,
+      packageInfoFromResult,
+      packageJSON,
+      packageLock,
+      yarnLock
+    });
 
     return { state: packageInfoFromResult.packageInfo.state, cid: evaluationInfo._id };
   }
@@ -198,7 +207,7 @@ export class StressTest extends CorpCheckRestService {
         packageName: packageName || 'express',
         cid: '1'
       });
-      console.log(i)
+      console.log(i);
     }
 
     return {

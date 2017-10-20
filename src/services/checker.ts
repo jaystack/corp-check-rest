@@ -51,9 +51,9 @@ export class StartPackageValidation extends Service {
   public async handle(
     @param cid,
     @param packageName,
-    @param packageJSONS3Key,
-    @param packageLockS3Key,
-    @param yarnLockS3Key,
+    @param packageJSON,
+    @param packageLock,
+    @param yarnLock,
     @param isProduction,
     @stage stage,
     @inject(TaskChannel) taskChannel: TaskChannel
@@ -63,10 +63,10 @@ export class StartPackageValidation extends Service {
       new Buffer(
         JSON.stringify({
           cid,
-          pkg: packageJSONS3Key ? `s3://${packageJSONS3Key}` : packageName,
+          pkg: packageJSON ? packageJSON : packageName,
           production: isProduction,
-          packageLock: packageLockS3Key && `s3://${packageLockS3Key}`,
-          yarnLock: yarnLockS3Key && `s3://${yarnLockS3Key}`
+          packageLock: packageLock,
+          yarnLock: yarnLock
         })
       )
     );

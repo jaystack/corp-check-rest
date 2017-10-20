@@ -13,6 +13,9 @@ export class ValidationStart extends Service {
     @param force,
     @param ruleSet,
     @param packageInfoFromResult: { packageInfo: PackageInfo; created: boolean },
+    @param packageJSON,
+    @param packageLock,
+    @param yarnLock,
     @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
     @inject(EvaluationsApi) evaluationsApi: EvaluationsApi,
     @inject(IsExpiredResult) isExpiredResult,
@@ -33,9 +36,9 @@ export class ValidationStart extends Service {
       if (packageInfo.state.type === StateType.PENDING) {
         await startPackageValidation({
           packageName: packageInfo.packageName,
-          packageJSONS3Key: packageInfo.packageJSONS3Key,
-          packageLockS3Key: packageInfo.packageLockS3Key,
-          yarnLockS3Key: packageInfo.yarnLockS3Key,
+          packageJSON,
+          packageLock,
+          yarnLock,
           cid: evaluationInfo._id,
           isProduction: packageInfo.isProduction
         });

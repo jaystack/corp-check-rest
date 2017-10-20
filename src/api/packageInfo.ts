@@ -21,12 +21,14 @@ export class PackageInfoApi extends Api {
     packageJSON,
     packageLock,
     yarnLock,
-    isProduction
+    isProduction,
+    persistBinaries
   }: {
     packageJSON: string;
     packageLock?: string;
     yarnLock?: string;
     isProduction: boolean;
+    persistBinaries?: boolean;
   }) {
     const hash = getHash(isProduction.toString() + packageJSON + packageLock + yarnLock);
 
@@ -47,7 +49,8 @@ export class PackageInfoApi extends Api {
         packageLock,
         yarnLock,
         isProduction,
-        isNpmModule: false
+        isNpmModule: false,
+        persistBinaries
       });
       created = true;
     }
@@ -98,7 +101,8 @@ export class PackageInfoApi extends Api {
     yarnLock,
     yarnLockS3Key,
     isProduction,
-    isNpmModule
+    isNpmModule,
+    persistBinaries
   }: {
     hash: string;
     packageName?: string;
@@ -110,12 +114,15 @@ export class PackageInfoApi extends Api {
     yarnLockS3Key?: string;
     isProduction: boolean;
     isNpmModule: boolean;
+    persistBinaries?: boolean;
   }) {
     const date = Date.now();
 
-    packageJSONS3Key = packageJSONS3Key || (await this.uploadFile(`packages/${hash}/package.json`, packageJSON));
-    packageLockS3Key = packageLockS3Key || (await this.uploadFile(`packages/${hash}/package-lock.json`, packageLock));
-    yarnLockS3Key = yarnLockS3Key || (await this.uploadFile(`packages/${hash}/yarn.lock`, yarnLock));
+    if (persistBinaries) {
+      packageJSONS3Key = packageJSONS3Key || (await this.uploadFile(`packages/${hash}/package.json`, packageJSON));
+      packageLockS3Key = packageLockS3Key || (await this.uploadFile(`packages/${hash}/package-lock.json`, packageLock));
+      yarnLockS3Key = yarnLockS3Key || (await this.uploadFile(`packages/${hash}/yarn.lock`, yarnLock));
+    }
 
     const item = await this.packageInfoCollection.insertOne({
       hash,
