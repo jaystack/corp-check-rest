@@ -30,7 +30,7 @@ export class Complete extends CorpCheckRestService {
     if (error) {
       await packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
-        meta: error,
+        meta: { error },
         type: StateType.FAILED
       });
       return;

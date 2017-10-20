@@ -88,7 +88,7 @@ export class EvaluationsApi extends Api {
       console.log('catch', new Date().toISOString());
       await this.packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
-        meta: { message: 'error in evaluate' },
+        meta: { error: 'error in evaluate' },
         type: StateType.FAILED
       });
       throw e;

@@ -1,4 +1,4 @@
-import { Api, inject, injectable, InjectionScope } from 'functionly';
+import { Api, inject, injectable, InjectionScope, environment } from 'functionly';
 import { PackageInfoCollection } from '../stores/mongoCollections';
 import { GetNpmInfo } from '../services/npm';
 import { FileStorage } from '../stores/s3filestorages';
@@ -8,13 +8,16 @@ import { PackageInfo, StateType } from '../types';
 const NPM_PACKAGE_NAME_PATTERN = /^((@([^@]+)\/)?([^@]+))(@(.*))?$/;
 
 @injectable(InjectionScope.Singleton)
+@environment('PACKAGE_VALIDATION_EXPIRATION_IN_DAYS', '30')
 export class PackageInfoApi extends Api {
+  private pendingMaxMinutes = 10;
   constructor(
     @inject(GetNpmInfo) private getNPMInfo,
     @inject(PackageInfoCollection) private packageInfoCollection: PackageInfoCollection,
     @inject(FileStorage) private files: FileStorage
   ) {
     super();
+    this.pendingMaxMinutes = process.env.PACKAGE_PENDING_EXPIRATION_IN_MINUTES || 10;
   }
 
   public async fromPackageJSON({
@@ -80,15 +83,17 @@ export class PackageInfoApi extends Api {
   }
 
   public async get({ hash }) {
-    return await this.packageInfoCollection.findOne<PackageInfo>({ hash, latest: true });
+    return await this.assertTimeout(await this.packageInfoCollection.findOne<PackageInfo>({ hash, latest: true }));
   }
 
   public async getById({ _id }) {
-    return await this.packageInfoCollection.findOne<PackageInfo>({ _id });
+    return await this.assertTimeout(await this.packageInfoCollection.findOne<PackageInfo>({ _id }));
   }
 
   public async getByIds(ids: any[]): Promise<PackageInfo[]> {
-    return await this.packageInfoCollection.find<PackageInfo>({ _id: { $in: ids } }).toArray();
+    return await this.assertTimeout(
+      await this.packageInfoCollection.find<PackageInfo>({ _id: { $in: ids } }).toArray()
+    );
   }
 
   public async create({
@@ -174,5 +179,28 @@ export class PackageInfoApi extends Api {
     }
 
     return undefined;
+  }
+
+  private async assertTimeout<T>(it: T): Promise<T> {
+    if (Array.isArray(it)) {
+      const result = [];
+      for (const item of it) {
+        result.push(await this.checkTimeout(<PackageInfo>item));
+      }
+      return <any>result;
+    } else {
+      const item: any = it;
+      return <any>await this.checkTimeout(<PackageInfo>item);
+    }
+  }
+
+  private async checkTimeout(item: PackageInfo) {
+    if (!item || item.state.type !== StateType.PENDING) return item;
+
+    const diff = Math.abs(Date.now() - item.date);
+    if (diff <= this.pendingMaxMinutes * 60 * 1000) return item;
+
+    await this.updateState({ _id: item._id, type: StateType.FAILED, meta: { error: 'timeout' } });
+    return await this.packageInfoCollection.findOne<PackageInfo>({ _id: item._id });
   }
 }

@@ -7,7 +7,6 @@ import * as AWS from 'aws-sdk';
 import { TaskChannel } from '../stores/rabbitChannels';
 
 @injectable(InjectionScope.Singleton)
-@environment('PACKAGE_VALIDATION_EXPIRATION_IN_DAYS', '30')
 @environment('PACKAGE_PENDING_EXPIRATION_IN_MINUTES', '10')
 export class IsExpiredResult extends Service {
   public async handle(
@@ -19,16 +18,13 @@ export class IsExpiredResult extends Service {
     var now = moment(new Date());
     var end = moment(packageInfo.date);
     var duration = moment.duration(now.diff(end));
-    var minutes = duration.asMinutes();
     var hours = duration.asHours();
 
-    const pendingMaxMinutes = process.env.PACKAGE_PENDING_EXPIRATION_IN_MINUTES || 10;
     const successMaxHours = process.env.PACKAGE_VALIDATION_EXPIRATION_IN_DAYS * 24 * 60 || 24 * 60;
 
     if (
       force ||
       packageInfo.state.type === StateType.FAILED ||
-      (packageInfo.state.type === StateType.PENDING && minutes > pendingMaxMinutes) ||
       (packageInfo.state.type === StateType.SUCCEEDED && hours > successMaxHours)
     ) {
       if (force || update) {
