@@ -181,7 +181,7 @@ export class Suggestion extends CorpCheckRestService {
         .catch(err => ({ objects: [] }));
       return objects.map(({ package: { name, description } }) => ({ title: name, description }));
     } else {
-      const { versions } = await request.get(`https://registry.npmjs.org/${name}`, { json: true });
+      const { versions } = await request.get(`https://registry.npmjs.org/${name.replace('/', '%2F')}`, { json: true });
       const pattern = new RegExp(`^${version.replace(/\./g, '\\.')}`);
       return [ ...Object.keys(versions || {}) ]
         .reverse()
