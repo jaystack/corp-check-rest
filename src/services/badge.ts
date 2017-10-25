@@ -15,31 +15,33 @@ export class Badge extends Service {
   ) {
     let content = null;
 
-    switch (true) {
-      case packageInfo.state.type === StateType.PENDING:
-        content = await getBase64String(files, '/images/status/corp-check-inprogress.svg');
-        break;
+    if (packageInfo && packageInfo.state) {
+      switch (true) {
+        case packageInfo.state.type === StateType.PENDING:
+          content = await getBase64String(files, '/images/status/corp-check-inprogress.svg');
+          break;
 
-      case packageInfo.state.type === StateType.FAILED:
-      case !evaluationInfo.result:
-        content = await getBase64String(files, '/images/status/corp-check-failed.svg');
-        break;
+        case packageInfo.state.type === StateType.FAILED:
+        case !evaluationInfo.result:
+          content = await getBase64String(files, '/images/status/corp-check-failed.svg');
+          break;
 
-      case evaluationInfo.result.qualification === Qualification.ACCEPTED:
-        content = await getBase64String(files, '/images/status/corp-check-accepted.svg');
-        break;
+        case evaluationInfo.result.qualification === Qualification.ACCEPTED:
+          content = await getBase64String(files, '/images/status/corp-check-accepted.svg');
+          break;
 
-      case evaluationInfo.result.qualification === Qualification.RECOMMENDED:
-        content = await getBase64String(files, '/images/status/corp-check-recommended.svg');
-        break;
+        case evaluationInfo.result.qualification === Qualification.RECOMMENDED:
+          content = await getBase64String(files, '/images/status/corp-check-recommended.svg');
+          break;
 
-      case evaluationInfo.result.qualification === Qualification.REJECTED:
-        content = await getBase64String(files, '/images/status/corp-check-rejected.svg');
-        break;
+        case evaluationInfo.result.qualification === Qualification.REJECTED:
+          content = await getBase64String(files, '/images/status/corp-check-rejected.svg');
+          break;
 
-      default:
-        content = await getBase64String(files, '/images/status/corp-check-failed.svg');
-        break;
+        default:
+          content = await getBase64String(files, '/images/status/corp-check-failed.svg');
+          break;
+      }
     }
 
     return content;
