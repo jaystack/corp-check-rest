@@ -192,12 +192,6 @@ export class Suggestion extends CorpCheckRestService {
   }
 }
 
-export const validation = Validation.createInvoker();
-export const packageInfo = Package.createInvoker();
-export const popularPackages = PopularPackages.createInvoker();
-export const getSuggestions = Suggestion.createInvoker();
-export const badge = BadgeService.createInvoker();
-
 @rest({ path: '/stresstest', methods: [ 'post' ] })
 export class StressTest extends CorpCheckRestService {
   public async handle(@param count, @param packageName, @inject(StartPackageValidation) startPackageValidation) {
@@ -220,5 +214,3 @@ export class StressTest extends CorpCheckRestService {
     };
   }
 }
-
-export const test = StressTest.createInvoker();

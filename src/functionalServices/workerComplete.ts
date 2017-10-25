@@ -8,7 +8,6 @@ import { CreateCacheItems } from './moduleMetaCache';
 
 import { StateType } from '../types';
 
-//TODO remove
 @rest({ path: '/complete', methods: [ 'post' ] })
 export class Complete extends CorpCheckRestService {
   public async handle(
@@ -19,14 +18,8 @@ export class Complete extends CorpCheckRestService {
     @inject(EvaluationsApi) evaluationsApi: EvaluationsApi,
     @inject(CreateCacheItems) createCacheItems
   ) {
-    console.log('cid', cid);
-    console.log('data', data);
-    console.log('error', error);
-
-    console.log('1', new Date().toISOString());
     const evaluationInfo = await evaluationsApi.get({ cid });
     if (!evaluationInfo) return;
-    console.log('2', new Date().toISOString());
     if (error) {
       await packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
@@ -35,18 +28,12 @@ export class Complete extends CorpCheckRestService {
       });
       return;
     }
-    console.log('3', new Date().toISOString());
-    console.log('evaluationInfo.ruleSet:', evaluationInfo.ruleSet);
     await evaluationsApi.evaluate({
       evaluationInfo,
       data
     });
-    console.log('4', new Date().toISOString());
-    if (data.meta) {
+    if (data && data.meta) {
       await createCacheItems({ meta: data.meta });
     }
-    console.log('5', new Date().toISOString());
   }
 }
-
-export const complete = Complete.createInvoker();

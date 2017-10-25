@@ -24,7 +24,6 @@ export class CreateCacheItems extends Service {
   }
 }
 
-//TODO remove
 @rest({ path: '/getmodulemeta', methods: [ 'post' ] })
 @environment('MODULE_META_EXPIRATION_IN_HOURS', '168')
 export class GetModuleMeta extends CorpCheckRestService {
@@ -43,5 +42,3 @@ export class GetModuleMeta extends CorpCheckRestService {
     return result;
   }
 }
-
-export const getModuleMeta = GetModuleMeta.createInvoker();

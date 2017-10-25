@@ -14,5 +14,3 @@ export class CheckPopularPackages extends CorpCheckRestService {
     );
   }
 }
-
-export const checkPopularPackages = CheckPopularPackages.createInvoker();
