@@ -2,8 +2,6 @@ import 'jest';
 import license from '../src/evaluators/license';
 import version from '../src/evaluators/version';
 import npmScores from '../src/evaluators/npmScores';
-import { StateType } from '../src/types';
-import { container } from 'functionly';
 import { LogType } from 'corp-check-core';
 
 describe('evaluators', () => {
@@ -514,6 +512,35 @@ describe('evaluators', () => {
       });
     });
 
+    describe('retributionScore', () => {
+      it('under', async () => {
+        const result = version({
+          node: {
+            name: 'name',
+            version: '0.1.0',
+            license: undefined,
+            dependencies: []
+          },
+          rule: { minVersion: '1.0.0', retributionScore: 0.8, rigorousDepth: 1, isRigorous: false },
+          depth: 0,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'version',
+          description: '',
+          score: 0.8,
+          logs: [
+            {
+              message: 'Unstable version: 0.1.0',
+              type: LogType.WARNING
+            }
+          ]
+        });
+      });
+    });
+
     describe('minVersion', () => {
       it('under', async () => {
         const result = version({
@@ -523,7 +550,7 @@ describe('evaluators', () => {
             license: undefined,
             dependencies: []
           },
-          rule: { minVersion: '1.0.0', rigorousDepth: 1, isRigorous: false },
+          rule: { minVersion: '1.0.0', retributionScore: 0.5, rigorousDepth: 1, isRigorous: false },
           depth: 0,
           packageMeta: undefined,
           unknownPackages: []
@@ -564,35 +591,6 @@ describe('evaluators', () => {
       });
     });
 
-    describe('retributionScore', () => {
-      it('under', async () => {
-        const result = version({
-          node: {
-            name: 'name',
-            version: '0.1.0',
-            license: undefined,
-            dependencies: []
-          },
-          rule: { minVersion: '1.0.0', retributionScore: 0.8, rigorousDepth: 1, isRigorous: false },
-          depth: 0,
-          packageMeta: undefined,
-          unknownPackages: []
-        });
-
-        expect(result).toEqual({
-          name: 'version',
-          description: '',
-          score: 0.8,
-          logs: [
-            {
-              message: 'Unstable version: 0.1.0',
-              type: LogType.WARNING
-            }
-          ]
-        });
-      });
-    });
-
     describe('isRigorous', () => {
       it('rigorousDepth > depth', async () => {
         const result = version({
@@ -602,7 +600,7 @@ describe('evaluators', () => {
             license: undefined,
             dependencies: []
           },
-          rule: { minVersion: '1.0.0', rigorousDepth: 1, isRigorous: true },
+          rule: { minVersion: '1.0.0', retributionScore: 0.5, rigorousDepth: 1, isRigorous: true },
           depth: 0,
           packageMeta: undefined,
           unknownPackages: []
@@ -656,7 +654,7 @@ describe('evaluators', () => {
             license: undefined,
             dependencies: []
           },
-          rule: { minVersion: '1.0.0', rigorousDepth: 1, isRigorous: true },
+          rule: { minVersion: '1.0.0', retributionScore: 0.5, rigorousDepth: 1, isRigorous: true },
           depth: 2,
           packageMeta: undefined,
           unknownPackages: []
@@ -686,7 +684,7 @@ describe('evaluators', () => {
           license: undefined,
           dependencies: []
         },
-        rule: { minVersion: '1.0.0', rigorousDepth: 1, isRigorous: false },
+        rule: { minVersion: '1.0.0', retributionScore: 0.5, rigorousDepth: 1, isRigorous: false },
         depth: 0,
         packageMeta: undefined,
         unknownPackages: [ 'pkg1' ]
@@ -713,7 +711,7 @@ describe('evaluators', () => {
           license: undefined,
           dependencies: []
         },
-        rule: { minVersion: '1.0.0', rigorousDepth: 1, isRigorous: false },
+        rule: { minVersion: '1.0.0', retributionScore: 0.5, rigorousDepth: 1, isRigorous: false },
         depth: 0,
         packageMeta: undefined,
         unknownPackages: [ 'pkg1', 'pkg2' ]
@@ -1058,11 +1056,11 @@ describe('evaluators', () => {
           license: undefined,
           dependencies: []
         },
-        rule: { qualityWeight: 0.5 },
+        rule: { qualityWeight: 0 },
         depth: 0,
         packageMeta: {
           npmScores: {
-            quality: 0.9,
+            quality: 0.5,
             popularity: 0.9,
             maintenance: 0.9
           }
@@ -1073,10 +1071,10 @@ describe('evaluators', () => {
       expect(result).toEqual({
         name: 'npm-scores',
         description: '',
-        score: 0.9, //TODO
+        score: 0.9,
         logs: [
           {
-            message: 'Quality: 90%',
+            message: 'Quality: 50%',
             type: LogType.INFO
           },
           {
@@ -1099,12 +1097,12 @@ describe('evaluators', () => {
           license: undefined,
           dependencies: []
         },
-        rule: { popularityWeight: 0.5 },
+        rule: { popularityWeight: 0 },
         depth: 0,
         packageMeta: {
           npmScores: {
             quality: 0.9,
-            popularity: 0.9,
+            popularity: 0.5,
             maintenance: 0.9
           }
         },
@@ -1114,14 +1112,14 @@ describe('evaluators', () => {
       expect(result).toEqual({
         name: 'npm-scores',
         description: '',
-        score: 0.9, //TODO
+        score: 0.9,
         logs: [
           {
             message: 'Quality: 90%',
             type: LogType.INFO
           },
           {
-            message: 'Popularity: 90%',
+            message: 'Popularity: 50%',
             type: LogType.INFO
           },
           {
@@ -1140,13 +1138,13 @@ describe('evaluators', () => {
           license: undefined,
           dependencies: []
         },
-        rule: { maintenanceWeight: 0.5 },
+        rule: { maintenanceWeight: 0 },
         depth: 0,
         packageMeta: {
           npmScores: {
             quality: 0.9,
             popularity: 0.9,
-            maintenance: 0.9
+            maintenance: 0.5
           }
         },
         unknownPackages: []
@@ -1155,7 +1153,7 @@ describe('evaluators', () => {
       expect(result).toEqual({
         name: 'npm-scores',
         description: '',
-        score: 0.9, //TODO
+        score: 0.9,
         logs: [
           {
             message: 'Quality: 90%',
@@ -1166,7 +1164,7 @@ describe('evaluators', () => {
             type: LogType.INFO
           },
           {
-            message: 'Maintenance: 90%',
+            message: 'Maintenance: 50%',
             type: LogType.INFO
           }
         ]
