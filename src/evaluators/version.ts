@@ -29,7 +29,7 @@ export default (({ node, rule, unknownPackages, depth }) => {
   return {
     name: 'version',
     description: '',
-    score: logs.length > 0 ? (logs[0].type === LogType.ERROR ? 0 : rule.retributionScore) : 1,
+    score: logs.length > 0 ? (logs[0].type === LogType.ERROR ? 0 : rule.retributionScore || 0.5) : 1,
     logs
   };
 }) as Evaluator<VersionRule>;
