@@ -1,0 +1,33 @@
+version: '3'
+services:
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+  rest:
+    image: corp-check-rest
+    build: .
+    ports:
+      - 3001:3000
+    environment:
+      - RABBITMQ_CONNECTION_URL=amqp://rabbit
+      - MONGO_CONNECTION_URL=mongodb://mongo:27017
+    command: npm run start:f
+  worker:
+    image: corp-check-worker
+    build: ../corp-check-worker
+    environment:
+      - RABBIT_ENDPOINT=amqp://rabbit
+      - API_URL=http://rest
+  web:
+    image: corp-check-web
+    build: ../corp-check-web
+    ports:
+      - 3000:3000
+    environment:
+      - API_URL=http://rest
