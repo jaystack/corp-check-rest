@@ -1,4 +1,4 @@
-import { Service, param, injectable, inject, InjectionScope, environment, getFunctionName, stage } from 'functionly';
+import { Service, param, injectable, inject, InjectionScope, environment, getFunctionName } from 'functionly';
 import { PackageInfoApi } from '../api/packageInfo';
 import { generate } from 'shortid';
 import * as moment from 'moment';
@@ -20,12 +20,12 @@ export class IsExpiredResult extends Service {
     var duration = moment.duration(now.diff(end));
     var hours = duration.asHours();
 
-    const successMaxHours = process.env.PACKAGE_VALIDATION_EXPIRATION_IN_DAYS * 24 * 60 || 24 * 60;
+    const successMaxHours = process.env.PACKAGE_VALIDATION_EXPIRATION_IN_DAYS * 24 || 24;
 
     if (
       force ||
       packageInfo.state.type === StateType.FAILED ||
-      (packageInfo.state.type === StateType.SUCCEEDED && hours > successMaxHours)
+      (packageInfo.state.type === StateType.SUCCEEDED && hours >= successMaxHours)
     ) {
       if (force || update) {
         await packageInfoApi.updateMany(
@@ -51,7 +51,6 @@ export class StartPackageValidation extends Service {
     @param packageLock,
     @param yarnLock,
     @param isProduction,
-    @stage stage,
     @inject(TaskChannel) taskChannel: TaskChannel
   ) {
     taskChannel.assertQueue();

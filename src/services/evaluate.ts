@@ -61,7 +61,6 @@ const evaluate = (
 @injectable(InjectionScope.Singleton)
 export class Evaluate extends Service {
   public async handle(@param data, @param ruleSet) {
-    console.log('ruleSet:', ruleSet);
     const evaluators: Evaluator[] = [ license, version, npmScores ];
     const rules = [ ruleSet.license, ruleSet.version, ruleSet.npmScores ];
     const rootEvaluation = evaluate(evaluators, rules, data.meta, data.tree, data.unknownPackages);
