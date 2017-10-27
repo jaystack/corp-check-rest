@@ -2,7 +2,7 @@ import 'jest';
 import { container } from 'functionly';
 
 import { Validation, Package, BadgeService } from '../src/functionalServices/rest';
-import { Complete } from '../src/functionalServices/workerComplete';
+import { Complete, Progress } from '../src/functionalServices/workerComplete';
 import { CreateCacheItems, GetModuleMeta } from '../src/functionalServices/moduleMetaCache';
 
 import { StateType } from '../src/types';
@@ -821,6 +821,72 @@ describe('functional services', () => {
 
       const res = await complete.handle('1', _, 'Error: error', packageInfoApi, evaluationsApi, _);
       expect(res).toEqual(undefined);
+    });
+  });
+
+  describe('progress', () => {
+    let progress: Progress = null;
+    beforeAll(() => {
+      progress = container.resolve(Progress);
+    });
+
+    it('no params', async () => {
+      const res = await progress.handle(_, _, _, _);
+      expect(res).toEqual(undefined);
+    });
+
+    it('missing message', async () => {
+      const res = await progress.handle('1', _, _, _);
+      expect(res).toEqual(undefined);
+    });
+
+    it('missing cid', async () => {
+      let counter = 0;
+      const evaluationsApi: any = {
+        get(params) {
+          const { cid } = params;
+          expect(Object.keys(params)).toEqual([ 'cid' ]);
+          expect(cid).toEqual(undefined);
+          counter++;
+
+          return null;
+        }
+      };
+
+      const res = await progress.handle(_, 'message', _, evaluationsApi);
+      expect(res).toEqual(undefined);
+      expect(counter).toEqual(1);
+    });
+
+    it('setProgress', async () => {
+      let counter = 0;
+
+      const evaluationsApi: any = {
+        async get(params) {
+          const { cid } = params;
+          expect(Object.keys(params)).toEqual([ 'cid' ]);
+          expect(cid).toEqual('1');
+          counter++;
+
+          return {
+            packageInfoId: '123'
+          };
+        }
+      };
+
+      const packageInfoApi: any = {
+        async setProgress(params) {
+          const { _id, message } = params;
+          expect(Object.keys(params)).toEqual([ '_id', 'message' ]);
+          expect(_id).toEqual('123');
+          expect(message).toEqual('message');
+          counter++;
+        }
+      };
+
+      const res = await progress.handle('1', 'message', packageInfoApi, evaluationsApi);
+      expect(res).toEqual(undefined);
+      expect(counter).toEqual(2);
     });
   });
 
