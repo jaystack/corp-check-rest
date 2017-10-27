@@ -37,3 +37,20 @@ export class Complete extends CorpCheckRestService {
     }
   }
 }
+
+@rest({ path: '/progress', methods: [ 'post' ] })
+export class Progress extends CorpCheckRestService {
+  public async handle(
+    @param cid,
+    @param message,
+    @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
+    @inject(EvaluationsApi) evaluationsApi: EvaluationsApi
+  ) {
+    if (message) {
+      const evaluationInfo = await evaluationsApi.get({ cid });
+      if (!evaluationInfo) return;
+
+      await packageInfoApi.setProgress({ _id: evaluationInfo.packageInfoId, message });
+    }
+  }
+}

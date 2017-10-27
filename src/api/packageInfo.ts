@@ -162,6 +162,20 @@ export class PackageInfoApi extends Api {
     return { updated };
   }
 
+  public async setProgress({ _id, message }): Promise<any> {
+    const updated = await this.packageInfoCollection.updateOne(
+      { _id, 'state.type': StateType.PENDING },
+      {
+        $set: {
+          'state.date': Date.now(),
+          'state.message': message
+        }
+      }
+    );
+
+    return { updated };
+  }
+
   public async updateMany(filter, update): Promise<any> {
     return await this.packageInfoCollection.updateMany(filter, {
       $set: update
