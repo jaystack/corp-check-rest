@@ -1,6 +1,12 @@
 import 'jest';
 jest.mock('request-promise-native');
+jest.mock('../src/evaluators/license');
+jest.mock('../src/evaluators/version');
+jest.mock('../src/evaluators/npmScores');
 const request = require('request-promise-native');
+const license = require('../src/evaluators/license').default;
+const version = require('../src/evaluators/version').default;
+const npmScores = require('../src/evaluators/npmScores').default;
 
 import { container } from 'functionly';
 import { Qualification } from 'corp-check-core';
@@ -663,6 +669,12 @@ describe('services', () => {
       evaluate = container.resolve(Evaluate);
     });
 
+    beforeEach(() => {
+      license.mockClear();
+      version.mockClear();
+      npmScores.mockClear();
+    });
+
     it('no params', async () => {
       try {
         const res = await evaluate.handle(undefined, undefined);
@@ -690,30 +702,1156 @@ describe('services', () => {
       }
     });
 
-    // it('#1', async () => {
-    //   const data = {
-    //     meta: {},
-    //     tree: {},
-    //     unknownPackages: []
-    //   };
-    //   const ruleSet = {
-    //     license: {},
-    //     version: {},
-    //     npmScores: {}
-    //   };
+    it('evaluation', async () => {
+      license.mockReturnValue({ score: 1 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
 
-    //   const res = await evaluate.handle(data, ruleSet);
-    //   expect(res).toEqual({
-    //     rootEvaluation: {
-    //       nodeName: 'name',
-    //       nodeVersion: 'version',
-    //       evaluations: [],
-    //       nodeScore: 1,
-    //       dependencies: []
-    //     },
-    //     qualification: Qualification.RECOMMENDED
-    //   });
-    // });
+      const data = {
+        meta: {
+          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: []
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 1,
+          dependencies: []
+        },
+        qualification: Qualification.RECOMMENDED
+      });
+
+      expect(license).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.license,
+        unknownPackages: [],
+        depth: 0
+      });
+
+      expect(version).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.version,
+        unknownPackages: [],
+        depth: 0
+      });
+
+      expect(npmScores).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.npmScores,
+        unknownPackages: [],
+        depth: 0
+      });
+    });
+
+    it('self score', async () => {
+      license.mockReturnValue({ score: 1 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 0.9 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: []
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 0.9 } ],
+          nodeScore: 0.9,
+          dependencies: []
+        },
+        qualification: Qualification.RECOMMENDED
+      });
+
+      expect(license).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.license,
+        unknownPackages: [],
+        depth: 0
+      });
+
+      expect(version).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.version,
+        unknownPackages: [],
+        depth: 0
+      });
+
+      expect(npmScores).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.npmScores,
+        unknownPackages: [],
+        depth: 0
+      });
+    });
+
+    it('accepted', async () => {
+      license.mockReturnValue({ score: 0.5 });
+      version.mockReturnValue({ score: 0.5 });
+      npmScores.mockReturnValue({ score: 0.5 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: []
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 0.5 }, { score: 0.5 }, { score: 0.5 } ],
+          nodeScore: 0.125,
+          dependencies: []
+        },
+        qualification: Qualification.ACCEPTED
+      });
+
+      expect(license).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.license,
+        unknownPackages: [],
+        depth: 0
+      });
+
+      expect(version).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.version,
+        unknownPackages: [],
+        depth: 0
+      });
+
+      expect(npmScores).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.npmScores,
+        unknownPackages: [],
+        depth: 0
+      });
+    });
+
+    it('rejected', async () => {
+      license.mockReturnValue({ score: 1 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 0 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: []
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 0 } ],
+          nodeScore: 0,
+          dependencies: []
+        },
+        qualification: Qualification.REJECTED
+      });
+
+      expect(license).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.license,
+        unknownPackages: [],
+        depth: 0
+      });
+
+      expect(version).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.version,
+        unknownPackages: [],
+        depth: 0
+      });
+
+      expect(npmScores).toBeCalledWith({
+        node: data.tree,
+        packageMeta: data.meta.name,
+        rule: ruleSet.npmScores,
+        unknownPackages: [],
+        depth: 0
+      });
+    });
+
+    it('evaluation with dependencies', async () => {
+      license.mockReturnValue({ score: 1 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { props: 1 } },
+          name0: { npmScores: { props: 2 } },
+          name1: { npmScores: { props: 3 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'name0',
+              version: 'version0',
+              license: undefined,
+              dependencies: []
+            },
+            {
+              name: 'name1',
+              version: 'version1',
+              license: undefined,
+              dependencies: []
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 1,
+          dependencies: [
+            {
+              nodeName: 'name0',
+              nodeVersion: 'version0',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: []
+            },
+            {
+              nodeName: 'name1',
+              nodeVersion: 'version1',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: []
+            }
+          ]
+        },
+        qualification: Qualification.RECOMMENDED
+      });
+
+      expect(license.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(version.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(npmScores.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+    });
+
+    it('deep recommended', async () => {
+      license.mockReturnValue({ score: 1 });
+      license.mockReturnValueOnce({ score: 1 });
+      license.mockReturnValueOnce({ score: 1 });
+      license.mockReturnValueOnce({ score: 0.36 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { props: 1 } },
+          name0: { npmScores: { props: 2 } },
+          name1: { npmScores: { props: 3 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'name0',
+              version: 'version0',
+              license: undefined,
+              dependencies: []
+            },
+            {
+              name: 'name1',
+              version: 'version1',
+              license: undefined,
+              dependencies: []
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 0.6,
+          dependencies: [
+            {
+              nodeName: 'name0',
+              nodeVersion: 'version0',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: []
+            },
+            {
+              nodeName: 'name1',
+              nodeVersion: 'version1',
+              evaluations: [ { score: 0.36 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 0.36,
+              dependencies: []
+            }
+          ]
+        },
+        qualification: Qualification.RECOMMENDED
+      });
+
+      expect(license.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(version.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(npmScores.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+    });
+
+    it('deep accepted', async () => {
+      license.mockReturnValue({ score: 1 });
+      license.mockReturnValueOnce({ score: 1 });
+      license.mockReturnValueOnce({ score: 1 });
+      license.mockReturnValueOnce({ score: 0.16 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { props: 1 } },
+          name0: { npmScores: { props: 2 } },
+          name1: { npmScores: { props: 3 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'name0',
+              version: 'version0',
+              license: undefined,
+              dependencies: []
+            },
+            {
+              name: 'name1',
+              version: 'version1',
+              license: undefined,
+              dependencies: []
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 0.4,
+          dependencies: [
+            {
+              nodeName: 'name0',
+              nodeVersion: 'version0',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: []
+            },
+            {
+              nodeName: 'name1',
+              nodeVersion: 'version1',
+              evaluations: [ { score: 0.16 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 0.16,
+              dependencies: []
+            }
+          ]
+        },
+        qualification: Qualification.ACCEPTED
+      });
+
+      expect(license.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(version.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(npmScores.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+    });
+
+    it('deep rejected', async () => {
+      license.mockReturnValue({ score: 1 });
+      license.mockReturnValueOnce({ score: 1 });
+      license.mockReturnValueOnce({ score: 1 });
+      license.mockReturnValueOnce({ score: 0 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { props: 1 } },
+          name0: { npmScores: { props: 2 } },
+          name1: { npmScores: { props: 3 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'name0',
+              version: 'version0',
+              license: undefined,
+              dependencies: []
+            },
+            {
+              name: 'name1',
+              version: 'version1',
+              license: undefined,
+              dependencies: []
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 0,
+          dependencies: [
+            {
+              nodeName: 'name0',
+              nodeVersion: 'version0',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: []
+            },
+            {
+              nodeName: 'name1',
+              nodeVersion: 'version1',
+              evaluations: [ { score: 0 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 0,
+              dependencies: []
+            }
+          ]
+        },
+        qualification: Qualification.REJECTED
+      });
+
+      expect(license.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(version.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(npmScores.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+    });
+
+    it('accepted - deep recommended', async () => {
+      license.mockReturnValue({ score: 1 });
+      license.mockReturnValueOnce({ score: 0.4 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { props: 1 } },
+          name0: { npmScores: { props: 2 } },
+          name1: { npmScores: { props: 3 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'name0',
+              version: 'version0',
+              license: undefined,
+              dependencies: []
+            },
+            {
+              name: 'name1',
+              version: 'version1',
+              license: undefined,
+              dependencies: []
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 0.4 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 0.4,
+          dependencies: [
+            {
+              nodeName: 'name0',
+              nodeVersion: 'version0',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: []
+            },
+            {
+              nodeName: 'name1',
+              nodeVersion: 'version1',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: []
+            }
+          ]
+        },
+        qualification: Qualification.ACCEPTED
+      });
+
+      expect(license.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(version.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+
+      expect(npmScores.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[1],
+            packageMeta: data.meta.name1,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ]
+      ]);
+    });
+
+    it('deep accepted - depth 2', async () => {
+      license.mockReturnValue({ score: 1 });
+      license.mockReturnValueOnce({ score: 1 });
+      license.mockReturnValueOnce({ score: 1 });
+      license.mockReturnValueOnce({ score: 0.0256 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { props: 1 } },
+          name0: { npmScores: { props: 2 } },
+          name00: { npmScores: { props: 3 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'name0',
+              version: 'version0',
+              license: undefined,
+              dependencies: [
+                {
+                  name: 'name00',
+                  version: 'version00',
+                  license: undefined,
+                  dependencies: []
+                }
+              ]
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 0.4,
+          dependencies: [
+            {
+              nodeName: 'name0',
+              nodeVersion: 'version0',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 0.16,
+              dependencies: [
+                {
+                  nodeName: 'name00',
+                  nodeVersion: 'version00',
+                  evaluations: [ { score: 0.0256 }, { score: 1 }, { score: 1 } ],
+                  nodeScore: 0.0256,
+                  dependencies: []
+                }
+              ]
+            }
+          ]
+        },
+        qualification: Qualification.ACCEPTED
+      });
+
+      expect(license.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0].dependencies[0],
+            packageMeta: data.meta.name00,
+            rule: ruleSet.license,
+            unknownPackages: [],
+            depth: 2
+          }
+        ]
+      ]);
+
+      expect(version.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0].dependencies[0],
+            packageMeta: data.meta.name00,
+            rule: ruleSet.version,
+            unknownPackages: [],
+            depth: 2
+          }
+        ]
+      ]);
+
+      expect(npmScores.mock.calls).toEqual([
+        [
+          {
+            node: data.tree,
+            packageMeta: data.meta.name,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 0
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0],
+            packageMeta: data.meta.name0,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 1
+          }
+        ],
+        [
+          {
+            node: data.tree.dependencies[0].dependencies[0],
+            packageMeta: data.meta.name00,
+            rule: ruleSet.npmScores,
+            unknownPackages: [],
+            depth: 2
+          }
+        ]
+      ]);
+    });
   });
 
   describe('GetNpmInfo', () => {
@@ -1441,7 +2579,7 @@ describe('services', () => {
         async create(pi) {
           expect(pi).toEqual(packageInfoFromResult.packageInfo);
 
-          return packageInfoNew
+          return packageInfoNew;
         }
       };
 
