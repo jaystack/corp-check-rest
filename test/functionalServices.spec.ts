@@ -83,7 +83,7 @@ describe('functional services', () => {
       });
 
       it('packageName ruleSet', async () => {
-        const _ruleSet = { rule: 1 };
+        const _ruleSet = '{ rule: 1 }';
 
         const packageInfoApiResult = {
           packageInfo: {
@@ -369,7 +369,7 @@ describe('functional services', () => {
       });
 
       it('packageJSON ruleSet', async () => {
-        const _ruleSet = { rule: 1 };
+        const _ruleSet = '{ rule: 1 }';
 
         const packageInfoApiResult = {
           packageInfo: {

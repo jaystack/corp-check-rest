@@ -21,7 +21,7 @@ export class EvaluationsApi extends Api {
   }
 
   public async fromRuleSet({ packageInfoId, ruleSet }) {
-    const ruleSetHash = getHash(JSON.stringify(ruleSet));
+    const ruleSetHash = getHash(ruleSet);
 
     return await this.evaluations.findOne<EvaluationInfo>({ packageInfoId, ruleSetHash });
   }
@@ -37,7 +37,7 @@ export class EvaluationsApi extends Api {
   }
 
   public async create({ packageInfoId, ruleSet }) {
-    const ruleSetHash = getHash(JSON.stringify(ruleSet));
+    const ruleSetHash = getHash(ruleSet);
     const date = Date.now();
     const cid = generate();
     const item = await this.evaluations.insertOne({
@@ -66,34 +66,31 @@ export class EvaluationsApi extends Api {
   }
 
   public async evaluate({ evaluationInfo, data }) {
-    console.log('3.1', new Date().toISOString());
-    const result = await this.evaluateService({
-      data,
-      ruleSet: await this.getRuleSet({ ruleSet: JSON.parse(evaluationInfo.ruleSet) })
-    });
     try {
-      console.log('3.2', new Date().toISOString());
+      const result = await this.evaluateService({
+        data,
+        ruleSet: await this.getRuleSet({ ruleSet: JSON.parse(evaluationInfo.ruleSet) })
+      });
+
       await this.packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
         meta: data,
         type: StateType.SUCCEEDED
       });
-      console.log('3.3', new Date().toISOString());
+
       await this.updateResult({
         cid: evaluationInfo._id,
         result
       });
+
       evaluationInfo.result = result;
     } catch (e) {
-      console.log('catch', new Date().toISOString());
       await this.packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
         meta: { error: 'error in evaluate' },
         type: StateType.FAILED
       });
       throw e;
-    } finally {
-      console.log('finally', new Date().toISOString());
     }
   }
 }

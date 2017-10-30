@@ -4,7 +4,7 @@ export type EvaluationInfo = {
   _id: any;
   packageInfoId: any;
   date: number;
-  ruleSet: Object;
+  ruleSet: string;
   ruleSetHash: string;
   result?: FinalEvaluation;
 };
