@@ -66,6 +66,7 @@ export class StartPackageValidation extends Service {
       )
     );
 
-    return taskChannel.waitForConfirms()
+    console.log('sendToQueue result', result)
+    return await taskChannel.waitForConfirms()
   }
 }
