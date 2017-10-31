@@ -55,6 +55,8 @@ export class AssertQueue extends Service {
         body: { vhost: '/', name: 'queue', durable: 'true', auto_delete: 'false', arguments: {} }
       });
     } catch (e) {
+      console.log(`${serviceUrl}/api/queues/%2F/${queue}`)
+      console.log(e)
       throw new Error('RabbitApiError');
     }
   }
@@ -82,6 +84,8 @@ export class PublishToQueue extends Service {
         }
       });
     } catch (e) {
+      console.log(`${serviceUrl}/api/exchanges/%2f/amq.default/publish`)
+      console.log(e)
       throw new Error('RabbitApiError');
     }
 
