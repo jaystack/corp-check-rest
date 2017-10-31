@@ -72,15 +72,15 @@ export class EvaluationsApi extends Api {
         ruleSet: await this.getRuleSet({ ruleSet: JSON.parse(evaluationInfo.ruleSet) })
       });
 
+      await this.updateResult({
+        cid: evaluationInfo._id,
+        result
+      });
+
       await this.packageInfoApi.updateState({
         _id: evaluationInfo.packageInfoId,
         meta: data,
         type: StateType.SUCCEEDED
-      });
-
-      await this.updateResult({
-        cid: evaluationInfo._id,
-        result
       });
 
       evaluationInfo.result = result;
