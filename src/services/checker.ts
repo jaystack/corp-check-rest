@@ -54,19 +54,33 @@ export class StartPackageValidation extends Service {
     @inject(TaskChannel) taskChannel: TaskChannel
   ) {
     taskChannel.assertQueue();
-    const result = taskChannel.sendToQueue(
-      new Buffer(
-        JSON.stringify({
-          cid,
-          pkg: packageJSON ? packageJSON : packageName,
-          production: isProduction,
-          packageLock: packageLock,
-          yarnLock: yarnLock
-        })
-      )
-    );
 
-    console.log('sendToQueue result', result)
-    return await taskChannel.waitForConfirms()
+    return new Promise((resolve, reject) => {
+      console.log('sendToQueue')
+      const result = taskChannel.sendToQueue(
+        new Buffer(
+          JSON.stringify({
+            cid,
+            pkg: packageJSON ? packageJSON : packageName,
+            production: isProduction,
+            packageLock: packageLock,
+            yarnLock: yarnLock
+          })
+        ),
+        undefined,
+        e => {
+          console.log('sendToQueue complete');
+          if (e) {
+            console.log('error', e);
+            console.log('error message', e.message);
+            return reject(e);
+          }
+          return resolve();
+        }
+      );
+
+      console.log('sendToQueue result', result);
+      // return await taskChannel.waitForConfirms();
+    });
   }
 }

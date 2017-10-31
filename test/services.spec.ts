@@ -371,9 +371,10 @@ describe('services', () => {
         assertQueue() {
           counter++;
         },
-        sendToQueue(buffer) {
+        sendToQueue(buffer, opt, clb) {
           counter++;
           expect(JSON.parse(buffer.toString('utf8'))).toEqual({});
+          clb()
         },
         waitForConfirms() {
           counter++;
@@ -396,7 +397,7 @@ describe('services', () => {
         taskChannel
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
     });
 
     it('packageName', async () => {
@@ -405,12 +406,13 @@ describe('services', () => {
         assertQueue() {
           counter++;
         },
-        sendToQueue(buffer) {
+        sendToQueue(buffer, opt, clb) {
           counter++;
           expect(JSON.parse(buffer.toString('utf8'))).toEqual({
             cid: '1',
             pkg: 'packageName'
           });
+          clb()
         },
         waitForConfirms() {
           counter++;
@@ -433,7 +435,7 @@ describe('services', () => {
         taskChannel
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
     });
 
     it('packageJSON', async () => {
@@ -442,12 +444,13 @@ describe('services', () => {
         assertQueue() {
           counter++;
         },
-        sendToQueue(buffer) {
+        sendToQueue(buffer, opt, clb) {
           counter++;
           expect(JSON.parse(buffer.toString('utf8'))).toEqual({
             cid: '1',
             pkg: 'packageJSONstring'
           });
+          clb()
         },
         waitForConfirms() {
           counter++;
@@ -470,7 +473,7 @@ describe('services', () => {
         taskChannel
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
     });
 
     it('packageName and packageJSON', async () => {
@@ -479,12 +482,13 @@ describe('services', () => {
         assertQueue() {
           counter++;
         },
-        sendToQueue(buffer) {
+        sendToQueue(buffer, opt, clb) {
           counter++;
           expect(JSON.parse(buffer.toString('utf8'))).toEqual({
             cid: '1',
             pkg: 'packageJSONstring'
           });
+          clb()
         },
         waitForConfirms() {
           counter++;
@@ -507,7 +511,7 @@ describe('services', () => {
         taskChannel
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
     });
 
     it('packageLock', async () => {
@@ -516,13 +520,14 @@ describe('services', () => {
         assertQueue() {
           counter++;
         },
-        sendToQueue(buffer) {
+        sendToQueue(buffer, opt, clb) {
           counter++;
           expect(JSON.parse(buffer.toString('utf8'))).toEqual({
             cid: '1',
             pkg: 'packageJSONstring',
             packageLock: 'packageLockContent'
           });
+          clb()
         },
         waitForConfirms() {
           counter++;
@@ -545,7 +550,7 @@ describe('services', () => {
         taskChannel
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
     });
 
     it('yarnLock', async () => {
@@ -554,13 +559,14 @@ describe('services', () => {
         assertQueue() {
           counter++;
         },
-        sendToQueue(buffer) {
+        sendToQueue(buffer, opt, clb) {
           counter++;
           expect(JSON.parse(buffer.toString('utf8'))).toEqual({
             cid: '1',
             pkg: 'packageJSONstring',
             yarnLock: 'yarnLockContent'
           });
+          clb()
         },
         waitForConfirms() {
           counter++;
@@ -583,7 +589,7 @@ describe('services', () => {
         taskChannel
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
     });
 
     it('isProduction true', async () => {
@@ -592,13 +598,14 @@ describe('services', () => {
         assertQueue() {
           counter++;
         },
-        sendToQueue(buffer) {
+        sendToQueue(buffer, opt, clb) {
           counter++;
           expect(JSON.parse(buffer.toString('utf8'))).toEqual({
             cid: '1',
             pkg: 'packageJSONstring',
             production: true
           });
+          clb()
         },
         waitForConfirms() {
           counter++;
@@ -621,7 +628,7 @@ describe('services', () => {
         taskChannel
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
     });
 
     it('isProduction false', async () => {
@@ -630,13 +637,14 @@ describe('services', () => {
         assertQueue() {
           counter++;
         },
-        sendToQueue(buffer) {
+        sendToQueue(buffer, opt, clb) {
           counter++;
           expect(JSON.parse(buffer.toString('utf8'))).toEqual({
             cid: '1',
             pkg: 'packageJSONstring',
             production: false
           });
+          clb()
         },
         waitForConfirms() {
           counter++;
@@ -659,7 +667,7 @@ describe('services', () => {
         taskChannel
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
     });
   });
 
