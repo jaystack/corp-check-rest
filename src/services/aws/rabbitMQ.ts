@@ -71,25 +71,37 @@ export class RabbitConnection extends Api {
   public async connect(url): Promise<ampq.Connection> {
     const connectionUrl = url || process.env.RABBITMQ_CONNECTION_URL || 'amqp://localhost:5672';
 
+    console.log('CONNECT', connectionUrl)
+
     if (this._connections.has(connectionUrl)) {
+      console.log('CONNECT HIT')
       const connection = this._connections.get(connectionUrl);
       return connection;
     }
 
     if (this._connectionPromises.has(connectionUrl)) {
+      console.log('CONNECT promise HIT')
       return await this._connectionPromises.get(connectionUrl);
     }
 
+    console.log('connect')
     const connectionPromise = ampq.connect(connectionUrl);
     this._connectionPromises.set(connectionUrl, connectionPromise);
-
+    console.log('connection promise set')
+    
     const connection = await connectionPromise;
+    console.log('connected')
+    
     this._connections.set(connectionUrl, connection);
-    connection.on('close', () => {
+    console.log('connection set')
+
+    connection.on('close', (e) => {
+      console.log('connection close', e)
       this._connectionPromises.delete(connectionUrl);
       this._connections.delete(connectionUrl);
     });
 
+    console.log('CONNECT DONE')
     return connection;
   }
 
