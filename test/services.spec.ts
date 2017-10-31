@@ -17,6 +17,7 @@ import { IsExpiredResult, StartPackageValidation } from '../src/services/checker
 import { Evaluate } from '../src/services/evaluate';
 import { GetNpmInfo } from '../src/services/npm';
 import { ValidationStart } from '../src/services/validationStart';
+import { AssertQueue, PublishToQueue } from '../src/services/rabbitMQ';
 
 describe('services', () => {
   describe('Badge', () => {
@@ -366,24 +367,21 @@ describe('services', () => {
     });
 
     it('no params', async () => {
+      const taskName = 'tasks';
+      const stage = 'test';
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+      process.env.RABBITMQ_QUEUE_NAME = taskName;
+
       let counter = 0;
-      const taskChannel: any = {
-        assertQueue() {
-          counter++;
-        },
-        sendToQueue(buffer) {
-          counter++;
-          expect(JSON.parse(buffer.toString('utf8'))).toEqual({});
-        },
-        waitForConfirms() {
-          counter++;
-          return new Promise(r =>
-            setTimeout(() => {
-              counter++;
-              r();
-            }, 100)
-          );
-        }
+
+      const assertQueue: any = params => {
+        counter++;
+        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+      };
+
+      const publishToQueue: any = params => {
+        counter++;
+        expect(params).toEqual({ queue: `${taskName}-${stage}`, payload: '{}' });
       };
 
       const res = await startPackageValidation.handle(
@@ -393,34 +391,39 @@ describe('services', () => {
         undefined,
         undefined,
         undefined,
-        taskChannel
+        assertQueue,
+        publishToQueue,
+        stage
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
+
+      delete process.env.RABBITMQ_QUEUE_NAME;
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
     });
 
     it('packageName', async () => {
+      const taskName = 'tasks';
+      const stage = 'test';
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+      process.env.RABBITMQ_QUEUE_NAME = taskName;
+
       let counter = 0;
-      const taskChannel: any = {
-        assertQueue() {
-          counter++;
-        },
-        sendToQueue(buffer) {
-          counter++;
-          expect(JSON.parse(buffer.toString('utf8'))).toEqual({
+
+      const assertQueue: any = params => {
+        counter++;
+        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+      };
+
+      const publishToQueue: any = params => {
+        counter++;
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          payload: JSON.stringify({
             cid: '1',
             pkg: 'packageName'
-          });
-        },
-        waitForConfirms() {
-          counter++;
-          return new Promise(r =>
-            setTimeout(() => {
-              counter++;
-              r();
-            }, 100)
-          );
-        }
+          })
+        });
       };
 
       const res = await startPackageValidation.handle(
@@ -430,34 +433,39 @@ describe('services', () => {
         undefined,
         undefined,
         undefined,
-        taskChannel
+        assertQueue,
+        publishToQueue,
+        stage
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
+
+      delete process.env.RABBITMQ_QUEUE_NAME;
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
     });
 
     it('packageJSON', async () => {
+      const taskName = 'tasks';
+      const stage = 'test';
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+      process.env.RABBITMQ_QUEUE_NAME = taskName;
+
       let counter = 0;
-      const taskChannel: any = {
-        assertQueue() {
-          counter++;
-        },
-        sendToQueue(buffer) {
-          counter++;
-          expect(JSON.parse(buffer.toString('utf8'))).toEqual({
+
+      const assertQueue: any = params => {
+        counter++;
+        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+      };
+
+      const publishToQueue: any = params => {
+        counter++;
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          payload: JSON.stringify({
             cid: '1',
             pkg: 'packageJSONstring'
-          });
-        },
-        waitForConfirms() {
-          counter++;
-          return new Promise(r =>
-            setTimeout(() => {
-              counter++;
-              r();
-            }, 100)
-          );
-        }
+          })
+        });
       };
 
       const res = await startPackageValidation.handle(
@@ -467,34 +475,39 @@ describe('services', () => {
         undefined,
         undefined,
         undefined,
-        taskChannel
+        assertQueue,
+        publishToQueue,
+        stage
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
+
+      delete process.env.RABBITMQ_QUEUE_NAME;
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
     });
 
     it('packageName and packageJSON', async () => {
+      const taskName = 'tasks';
+      const stage = 'test';
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+      process.env.RABBITMQ_QUEUE_NAME = taskName;
+
       let counter = 0;
-      const taskChannel: any = {
-        assertQueue() {
-          counter++;
-        },
-        sendToQueue(buffer) {
-          counter++;
-          expect(JSON.parse(buffer.toString('utf8'))).toEqual({
+
+      const assertQueue: any = params => {
+        counter++;
+        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+      };
+
+      const publishToQueue: any = params => {
+        counter++;
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          payload: JSON.stringify({
             cid: '1',
             pkg: 'packageJSONstring'
-          });
-        },
-        waitForConfirms() {
-          counter++;
-          return new Promise(r =>
-            setTimeout(() => {
-              counter++;
-              r();
-            }, 100)
-          );
-        }
+          })
+        });
       };
 
       const res = await startPackageValidation.handle(
@@ -504,35 +517,40 @@ describe('services', () => {
         undefined,
         undefined,
         undefined,
-        taskChannel
+        assertQueue,
+        publishToQueue,
+        stage
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
+
+      delete process.env.RABBITMQ_QUEUE_NAME;
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
     });
 
     it('packageLock', async () => {
+      const taskName = 'tasks';
+      const stage = 'test';
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+      process.env.RABBITMQ_QUEUE_NAME = taskName;
+
       let counter = 0;
-      const taskChannel: any = {
-        assertQueue() {
-          counter++;
-        },
-        sendToQueue(buffer) {
-          counter++;
-          expect(JSON.parse(buffer.toString('utf8'))).toEqual({
+
+      const assertQueue: any = params => {
+        counter++;
+        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+      };
+
+      const publishToQueue: any = params => {
+        counter++;
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          payload: JSON.stringify({
             cid: '1',
             pkg: 'packageJSONstring',
             packageLock: 'packageLockContent'
-          });
-        },
-        waitForConfirms() {
-          counter++;
-          return new Promise(r =>
-            setTimeout(() => {
-              counter++;
-              r();
-            }, 100)
-          );
-        }
+          })
+        });
       };
 
       const res = await startPackageValidation.handle(
@@ -542,35 +560,40 @@ describe('services', () => {
         'packageLockContent',
         undefined,
         undefined,
-        taskChannel
+        assertQueue,
+        publishToQueue,
+        stage
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
+
+      delete process.env.RABBITMQ_QUEUE_NAME;
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
     });
 
     it('yarnLock', async () => {
+      const taskName = 'tasks';
+      const stage = 'test';
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+      process.env.RABBITMQ_QUEUE_NAME = taskName;
+
       let counter = 0;
-      const taskChannel: any = {
-        assertQueue() {
-          counter++;
-        },
-        sendToQueue(buffer) {
-          counter++;
-          expect(JSON.parse(buffer.toString('utf8'))).toEqual({
+
+      const assertQueue: any = params => {
+        counter++;
+        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+      };
+
+      const publishToQueue: any = params => {
+        counter++;
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          payload: JSON.stringify({
             cid: '1',
             pkg: 'packageJSONstring',
             yarnLock: 'yarnLockContent'
-          });
-        },
-        waitForConfirms() {
-          counter++;
-          return new Promise(r =>
-            setTimeout(() => {
-              counter++;
-              r();
-            }, 100)
-          );
-        }
+          })
+        });
       };
 
       const res = await startPackageValidation.handle(
@@ -580,35 +603,40 @@ describe('services', () => {
         undefined,
         'yarnLockContent',
         undefined,
-        taskChannel
+        assertQueue,
+        publishToQueue,
+        stage
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
+
+      delete process.env.RABBITMQ_QUEUE_NAME;
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
     });
 
     it('isProduction true', async () => {
+      const taskName = 'tasks';
+      const stage = 'test';
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+      process.env.RABBITMQ_QUEUE_NAME = taskName;
+
       let counter = 0;
-      const taskChannel: any = {
-        assertQueue() {
-          counter++;
-        },
-        sendToQueue(buffer) {
-          counter++;
-          expect(JSON.parse(buffer.toString('utf8'))).toEqual({
+
+      const assertQueue: any = params => {
+        counter++;
+        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+      };
+
+      const publishToQueue: any = params => {
+        counter++;
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          payload: JSON.stringify({
             cid: '1',
             pkg: 'packageJSONstring',
             production: true
-          });
-        },
-        waitForConfirms() {
-          counter++;
-          return new Promise(r =>
-            setTimeout(() => {
-              counter++;
-              r();
-            }, 100)
-          );
-        }
+          })
+        });
       };
 
       const res = await startPackageValidation.handle(
@@ -618,35 +646,40 @@ describe('services', () => {
         undefined,
         undefined,
         true,
-        taskChannel
+        assertQueue,
+        publishToQueue,
+        stage
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
+
+      delete process.env.RABBITMQ_QUEUE_NAME;
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
     });
 
     it('isProduction false', async () => {
+      const taskName = 'tasks';
+      const stage = 'test';
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+      process.env.RABBITMQ_QUEUE_NAME = taskName;
+
       let counter = 0;
-      const taskChannel: any = {
-        assertQueue() {
-          counter++;
-        },
-        sendToQueue(buffer) {
-          counter++;
-          expect(JSON.parse(buffer.toString('utf8'))).toEqual({
+
+      const assertQueue: any = params => {
+        counter++;
+        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+      };
+
+      const publishToQueue: any = params => {
+        counter++;
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          payload: JSON.stringify({
             cid: '1',
             pkg: 'packageJSONstring',
             production: false
-          });
-        },
-        waitForConfirms() {
-          counter++;
-          return new Promise(r =>
-            setTimeout(() => {
-              counter++;
-              r();
-            }, 100)
-          );
-        }
+          })
+        });
       };
 
       const res = await startPackageValidation.handle(
@@ -656,10 +689,15 @@ describe('services', () => {
         undefined,
         undefined,
         false,
-        taskChannel
+        assertQueue,
+        publishToQueue,
+        stage
       );
       expect(res).toEqual(undefined);
-      expect(counter).toEqual(4);
+      expect(counter).toEqual(2);
+
+      delete process.env.RABBITMQ_QUEUE_NAME;
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
     });
   });
 
@@ -2596,6 +2634,168 @@ describe('services', () => {
         startPackageValidation
       );
       expect(res).toEqual(evaluationInfo);
+    });
+  });
+
+  describe('AssertQueue', () => {
+    let assertQueue: AssertQueue = null;
+    beforeAll(() => {
+      assertQueue = container.resolve(AssertQueue);
+    });
+
+    beforeEach(() => {
+      request.mockClear();
+    });
+
+    it('no params', async () => {
+      try {
+        const res = await assertQueue.handle(undefined, undefined);
+        expect(false).toEqual(true);
+      } catch (e) {
+        expect(true).toEqual(true);
+      }
+    });
+
+    it('assert queue', async () => {
+      request.mockReturnValue(Promise.resolve());
+
+      const kmsServiceUrl: any = {
+        async getUrl() {
+          return 'rabbitURL';
+        }
+      };
+
+      const res = await assertQueue.handle('queue', kmsServiceUrl);
+      expect(res).toEqual(undefined);
+      expect(request).lastCalledWith({
+        uri: 'rabbitURL/api/queues/%2F/queue',
+        method: 'PUT',
+        json: true,
+        body: { vhost: '/', name: 'queue', durable: 'true', auto_delete: 'false', arguments: {} }
+      });
+    });
+
+    it('assert queue http error', async () => {
+      request.mockReturnValue(Promise.reject(new Error('assert error')));
+
+      const kmsServiceUrl: any = {
+        async getUrl() {
+          return 'rabbitURL';
+        }
+      };
+
+      try {
+        const res = await assertQueue.handle('queue', kmsServiceUrl);
+      } catch (e) {
+        expect(e.message).toEqual('RabbitApiError');
+      }
+
+      expect(request).lastCalledWith({
+        uri: 'rabbitURL/api/queues/%2F/queue',
+        method: 'PUT',
+        json: true,
+        body: { vhost: '/', name: 'queue', durable: 'true', auto_delete: 'false', arguments: {} }
+      });
+    });
+  });
+
+  describe('PublishToQueue', () => {
+    let publishToQueue: PublishToQueue = null;
+    beforeAll(() => {
+      publishToQueue = container.resolve(PublishToQueue);
+    });
+
+    beforeEach(() => {
+      request.mockClear();
+    });
+
+    it('no params', async () => {
+      try {
+        const res = await publishToQueue.handle(undefined, undefined, undefined);
+        expect(false).toEqual(true);
+      } catch (e) {
+        expect(true).toEqual(true);
+      }
+    });
+
+    it('assert queue', async () => {
+      request.mockReturnValue(Promise.resolve({ routed: true }));
+
+      const kmsServiceUrl: any = {
+        async getUrl() {
+          return 'rabbitURL';
+        }
+      };
+
+      const res = await publishToQueue.handle('queue', 'payload', kmsServiceUrl);
+      expect(res).toEqual(undefined);
+      expect(request).lastCalledWith({
+        uri: 'rabbitURL/api/exchanges/%2f/amq.default/publish',
+        method: 'POST',
+        json: true,
+        body: {
+          properties: {},
+          routing_key: 'queue',
+          payload: 'payload',
+          payload_encoding: 'string'
+        }
+      });
+    });
+
+    it('assert queue http error', async () => {
+      request.mockReturnValue(Promise.reject(new Error('http error')));
+
+      const kmsServiceUrl: any = {
+        async getUrl() {
+          return 'rabbitURL';
+        }
+      };
+
+      try {
+        const res = await publishToQueue.handle('queue', 'payload', kmsServiceUrl);
+      } catch (e) {
+        expect(e.message).toEqual('RabbitApiError');
+      }
+
+      expect(request).lastCalledWith({
+        uri: 'rabbitURL/api/exchanges/%2f/amq.default/publish',
+        method: 'POST',
+        json: true,
+        body: {
+          properties: {},
+          routing_key: 'queue',
+          payload: 'payload',
+          payload_encoding: 'string'
+        }
+      });
+    });
+
+    it('assert queue not routed', async () => {
+      request.mockReturnValue(Promise.resolve({ routed: false }));
+
+      const kmsServiceUrl: any = {
+        async getUrl() {
+          return 'rabbitURL';
+        }
+      };
+
+      try {
+        const res = await publishToQueue.handle('queue', 'payload', kmsServiceUrl);
+      } catch (e) {
+        expect(e.message).toEqual('RabbitMessageToQueue');
+      }
+
+      expect(request).lastCalledWith({
+        uri: 'rabbitURL/api/exchanges/%2f/amq.default/publish',
+        method: 'POST',
+        json: true,
+        body: {
+          properties: {},
+          routing_key: 'queue',
+          payload: 'payload',
+          payload_encoding: 'string'
+        }
+      });
     });
   });
 });

@@ -1,10 +1,10 @@
-import { Service, param, injectable, inject, InjectionScope, environment, getFunctionName } from 'functionly';
+import { Service, param, injectable, inject, InjectionScope, environment, getFunctionName, stage } from 'functionly';
 import { PackageInfoApi } from '../api/packageInfo';
 import { generate } from 'shortid';
 import * as moment from 'moment';
 import { PackageInfo, StateType } from '../types';
 import * as AWS from 'aws-sdk';
-import { TaskChannel } from '../stores/rabbitChannels';
+import { AssertQueue, PublishToQueue } from './rabbitMQ';
 
 @injectable(InjectionScope.Singleton)
 @environment('PACKAGE_PENDING_EXPIRATION_IN_MINUTES', '10')
@@ -43,6 +43,7 @@ export class IsExpiredResult extends Service {
 }
 
 @injectable(InjectionScope.Singleton)
+@environment('RABBITMQ_QUEUE_NAME', 'tasks')
 export class StartPackageValidation extends Service {
   public async handle(
     @param cid,
@@ -51,21 +52,22 @@ export class StartPackageValidation extends Service {
     @param packageLock,
     @param yarnLock,
     @param isProduction,
-    @inject(TaskChannel) taskChannel: TaskChannel
+    @inject(AssertQueue) assertQueue,
+    @inject(PublishToQueue) publishToQueue,
+    @stage stage
   ) {
-    taskChannel.assertQueue();
-    const result = taskChannel.sendToQueue(
-      new Buffer(
-        JSON.stringify({
-          cid,
-          pkg: packageJSON ? packageJSON : packageName,
-          production: isProduction,
-          packageLock: packageLock,
-          yarnLock: yarnLock
-        })
-      )
-    );
+    const queue = `${process.env.RABBITMQ_QUEUE_NAME}-${stage}`;
 
-    return await taskChannel.waitForConfirms()
+    await assertQueue({ queue });
+    await publishToQueue({
+      queue,
+      payload: JSON.stringify({
+        cid,
+        pkg: packageJSON ? packageJSON : packageName,
+        production: isProduction,
+        packageLock: packageLock,
+        yarnLock: yarnLock
+      })
+    });
   }
 }
