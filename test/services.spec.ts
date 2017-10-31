@@ -1969,6 +1969,35 @@ describe('services', () => {
       });
     });
 
+    it('name changed registry', async () => {
+      const npm_registry_url = 'customUrl'
+      expect(process.env.NPM_REGISTRY_URL).toEqual(undefined)
+      process.env.NPM_REGISTRY_URL = npm_registry_url
+
+      const mockResult = {
+        name: 'name',
+        'dist-tags': { latest: 'latestVersion' },
+        versions: { latestVersion: { versionData: 1 } }
+      };
+      request.mockReturnValue(Promise.resolve(mockResult));
+
+      const res = await getNpmInfo.handle('name');
+      expect(res).toEqual({
+        name: 'name',
+        version: 'latestVersion',
+        latestVersion: 'latestVersion',
+        versionJSON: { versionData: 1 },
+        raw: mockResult
+      });
+      expect(request).lastCalledWith({
+        uri: 'customUrl/name',
+        json: true
+      })
+
+      delete process.env.NPM_REGISTRY_URL
+      expect(process.env.NPM_REGISTRY_URL).toEqual(undefined)
+    });
+
     it('name@version', async () => {
       const mockResult = {
         name: 'name',

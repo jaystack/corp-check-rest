@@ -1,4 +1,4 @@
-import { Service, param, injectable, InjectionScope } from 'functionly';
+import { Service, param, injectable, InjectionScope, environment } from 'functionly';
 import * as request from 'request-promise-native';
 
 export const LATEST_VERSION = 'latest';
@@ -23,13 +23,14 @@ export class PackageVersionNotExists extends Error {
 }
 
 @injectable(InjectionScope.Singleton)
+@environment('NPM_REGISTRY_URL', 'https://registry.npmjs.org')
 export class GetNpmInfo extends Service {
   public async handle(@param name, @param version = LATEST_VERSION) {
     let info;
 
     try {
       info = await request({
-        uri: `https://registry.npmjs.org/${name.replace('/', '%2F')}`,
+        uri: `${process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org'}/${name.replace('/', '%2F')}`,
         json: true
       });
     } catch (e) {
