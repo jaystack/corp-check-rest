@@ -25,7 +25,7 @@ describe('apis', () => {
 
           expect(update.$set['state.message']).toEqual('message');
           expect(typeof update.$set['state.date']).toEqual('number');
-          expect(Math.abs(Date.now() - update.$set['state.date']) < 10).toEqual(true);
+          expect(Math.abs(Date.now() - update.$set['state.date']) < 100).toEqual(true);
 
           counter++;
 
@@ -56,7 +56,7 @@ describe('apis', () => {
           expect(update.$set.meta).toEqual({ metaValue: 1 });
           expect(update.$set.state.type).toEqual(StateType.SUCCEEDED);
           expect(typeof update.$set.state.date).toEqual('number');
-          expect(Math.abs(Date.now() - update.$set.state.date) < 10).toEqual(true);
+          expect(Math.abs(Date.now() - update.$set.state.date) < 100).toEqual(true);
 
           counter++;
 
@@ -245,7 +245,7 @@ describe('apis', () => {
             expect(update.$set.meta).toEqual({ error: 'timeout' });
             expect(update.$set.state.type).toEqual(StateType.FAILED);
             expect(typeof update.$set.state.date).toEqual('number');
-            expect(Math.abs(Date.now() - update.$set.state.date) < 10).toEqual(true);
+            expect(Math.abs(Date.now() - update.$set.state.date) < 100).toEqual(true);
 
             counter++;
           }
@@ -304,7 +304,7 @@ describe('apis', () => {
             expect(update.$set.meta).toEqual({ error: 'timeout' });
             expect(update.$set.state.type).toEqual(StateType.FAILED);
             expect(typeof update.$set.state.date).toEqual('number');
-            expect(Math.abs(Date.now() - update.$set.state.date) < 10).toEqual(true);
+            expect(Math.abs(Date.now() - update.$set.state.date) < 100).toEqual(true);
 
             counter++;
           }
@@ -497,7 +497,7 @@ describe('apis', () => {
             expect(update.$set.meta).toEqual({ error: 'timeout' });
             expect(update.$set.state.type).toEqual(StateType.FAILED);
             expect(typeof update.$set.state.date).toEqual('number');
-            expect(Math.abs(Date.now() - update.$set.state.date) < 10).toEqual(true);
+            expect(Math.abs(Date.now() - update.$set.state.date) < 100).toEqual(true);
 
             counter++;
           }
@@ -552,7 +552,7 @@ describe('apis', () => {
             expect(update.$set.meta).toEqual({ error: 'timeout' });
             expect(update.$set.state.type).toEqual(StateType.FAILED);
             expect(typeof update.$set.state.date).toEqual('number');
-            expect(Math.abs(Date.now() - update.$set.state.date) < 10).toEqual(true);
+            expect(Math.abs(Date.now() - update.$set.state.date) < 100).toEqual(true);
 
             counter++;
           }
@@ -770,7 +770,7 @@ describe('apis', () => {
             expect(update.$set.meta).toEqual({ error: 'timeout' });
             expect(update.$set.state.type).toEqual(StateType.FAILED);
             expect(typeof update.$set.state.date).toEqual('number');
-            expect(Math.abs(Date.now() - update.$set.state.date) < 10).toEqual(true);
+            expect(Math.abs(Date.now() - update.$set.state.date) < 100).toEqual(true);
 
             counter++;
           }
@@ -835,7 +835,7 @@ describe('apis', () => {
             expect(update.$set.meta).toEqual({ error: 'timeout' });
             expect(update.$set.state.type).toEqual(StateType.FAILED);
             expect(typeof update.$set.state.date).toEqual('number');
-            expect(Math.abs(Date.now() - update.$set.state.date) < 10).toEqual(true);
+            expect(Math.abs(Date.now() - update.$set.state.date) < 100).toEqual(true);
 
             counter++;
           }

@@ -381,7 +381,7 @@ describe('services', () => {
             setTimeout(() => {
               counter++;
               r();
-            }, 10)
+            }, 100)
           );
         }
       };
@@ -418,7 +418,7 @@ describe('services', () => {
             setTimeout(() => {
               counter++;
               r();
-            }, 10)
+            }, 100)
           );
         }
       };
@@ -455,7 +455,7 @@ describe('services', () => {
             setTimeout(() => {
               counter++;
               r();
-            }, 10)
+            }, 100)
           );
         }
       };
@@ -492,7 +492,7 @@ describe('services', () => {
             setTimeout(() => {
               counter++;
               r();
-            }, 10)
+            }, 100)
           );
         }
       };
@@ -530,7 +530,7 @@ describe('services', () => {
             setTimeout(() => {
               counter++;
               r();
-            }, 10)
+            }, 100)
           );
         }
       };
@@ -568,7 +568,7 @@ describe('services', () => {
             setTimeout(() => {
               counter++;
               r();
-            }, 10)
+            }, 100)
           );
         }
       };
@@ -606,7 +606,7 @@ describe('services', () => {
             setTimeout(() => {
               counter++;
               r();
-            }, 10)
+            }, 100)
           );
         }
       };
@@ -644,7 +644,7 @@ describe('services', () => {
             setTimeout(() => {
               counter++;
               r();
-            }, 10)
+            }, 100)
           );
         }
       };
