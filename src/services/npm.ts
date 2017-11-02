@@ -23,7 +23,7 @@ export class PackageVersionNotExists extends Error {
 }
 
 @injectable(InjectionScope.Singleton)
-@environment('NPM_REGISTRY_URL', 'https://registry.npmjs.org')
+//@environment('NPM_REGISTRY_URL', 'https://registry.npmjs.org')
 export class GetNpmInfo extends Service {
   public async handle(@param name, @param version = LATEST_VERSION) {
     let info;
