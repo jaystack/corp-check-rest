@@ -136,7 +136,7 @@ export class PopularPackages extends CorpCheckRestService {
           version,
           state: getRelatedPackageInfo(packageInfoId).state,
           qualification,
-          score
+          score: Math.round(100 * score) / 100
         })
       )
       .sort((a, b) => b.score - a.score);
