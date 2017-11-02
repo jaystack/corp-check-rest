@@ -737,6 +737,28 @@ describe('evaluators', () => {
         });
       });
 
+      it('with license included 3', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'BSD-3-Clause', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [ 'BSD-3-Clause' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
+
       it('with license included AND', async () => {
         const result = license({
           node: {

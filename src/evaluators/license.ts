@@ -5,7 +5,7 @@ import { valid, parse } from 'spdx';
 
 const validateLicense = ({ tree, node, exclude, include, conjunction = false }) => {
   if (tree.license) {
-    if (exclude && exclude.map(l => l.toUpperCase()).includes(tree.license))
+    if (exclude && exclude.includes(tree.license))
       return [
         {
           message: `Forbidden license: ${conjunction ? tree.license : node.license.type}`,
@@ -13,7 +13,7 @@ const validateLicense = ({ tree, node, exclude, include, conjunction = false }) 
         } as Log
       ];
 
-    if (include && !include.map(l => l.toUpperCase()).includes(tree.license))
+    if (include && !include.includes(tree.license))
       return [
         {
           message: `Not allowed license: ${conjunction ? tree.license : node.license.type}`,
