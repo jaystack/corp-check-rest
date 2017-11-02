@@ -93,7 +93,51 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: {},
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
+
+      it('empty rule config with licenses AND', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT AND ISC', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: {},
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
+
+      it('empty rule config with licenses AND', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT OR ISC', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
           rule: {},
@@ -139,7 +183,7 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
           rule: { licenseRequired: false },
@@ -188,7 +232,7 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
           rule: { licenseRequired: true },
@@ -234,7 +278,7 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
           rule: { exclude: [] },
@@ -256,10 +300,54 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
-          rule: { exclude: [ 'other license' ] },
+          rule: { exclude: [ 'ISC' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
+
+      it('with license not included AND', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT AND WTFPL', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { exclude: [ 'ISC' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
+
+      it('with license not included OR', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT OR WTFPL', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { exclude: [ 'ISC' ] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
@@ -278,10 +366,10 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
-          rule: { exclude: [ 'license' ] },
+          rule: { exclude: [ 'MIT' ] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
@@ -293,7 +381,7 @@ describe('evaluators', () => {
           score: 0,
           logs: [
             {
-              message: 'Forbidden license: license',
+              message: 'Forbidden license: MIT',
               type: LogType.ERROR
             }
           ]
@@ -305,10 +393,10 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
-          rule: { exclude: [ 'license2', 'LICENSE' ] },
+          rule: { exclude: [ 'ISC', 'MIT' ] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
@@ -320,22 +408,22 @@ describe('evaluators', () => {
           score: 0,
           logs: [
             {
-              message: 'Forbidden license: license',
+              message: 'Forbidden license: MIT',
               type: LogType.ERROR
             }
           ]
         });
       });
 
-      it('with license included 3', async () => {
+      it('with license included AND', async () => {
         const result = license({
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'LicensE', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT AND WTFPL', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
-          rule: { exclude: [ 'license2', 'LICENSE' ] },
+          rule: { exclude: [ 'ISC', 'MIT' ] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
@@ -347,10 +435,32 @@ describe('evaluators', () => {
           score: 0,
           logs: [
             {
-              message: 'Forbidden license: LicensE',
+              message: 'Forbidden license: MIT',
               type: LogType.ERROR
             }
           ]
+        });
+      });
+
+      it('with license included OR', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT OR WTFPL', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { exclude: [ 'ISC', 'MIT' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
         });
       });
     });
@@ -383,7 +493,7 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
           rule: { include: [] },
@@ -398,22 +508,22 @@ describe('evaluators', () => {
           score: 0,
           logs: [
             {
-              message: 'Not allowed license: license',
+              message: 'Not allowed license: MIT',
               type: LogType.ERROR
             }
           ]
         });
       });
 
-      it('with license not included', async () => {
+      it('empty - with license AND', async () => {
         const result = license({
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT AND ISC', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
-          rule: { include: [ 'other license' ] },
+          rule: { include: [] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
@@ -425,7 +535,158 @@ describe('evaluators', () => {
           score: 0,
           logs: [
             {
-              message: 'Not allowed license: license',
+              message: 'Not allowed license: MIT',
+              type: LogType.ERROR
+            },
+            {
+              message: 'Not allowed license: ISC',
+              type: LogType.ERROR
+            }
+          ]
+        });
+      });
+
+      it('empty - with license OR', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT OR ISC', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 0,
+          logs: [
+            {
+              message: 'Not allowed license: MIT',
+              type: LogType.ERROR
+            },
+            {
+              message: 'Not allowed license: ISC',
+              type: LogType.ERROR
+            }
+          ]
+        });
+      });
+
+      it('with license not included', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [ 'ISC' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 0,
+          logs: [
+            {
+              message: 'Not allowed license: MIT',
+              type: LogType.ERROR
+            }
+          ]
+        });
+      });
+
+      it('with license not included AND', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT AND WTFPL', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [ 'ISC' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 0,
+          logs: [
+            {
+              message: 'Not allowed license: MIT',
+              type: LogType.ERROR
+            },
+            {
+              message: 'Not allowed license: WTFPL',
+              type: LogType.ERROR
+            }
+          ]
+        });
+      });
+
+      it('with license one included AND', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT AND WTFPL', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [ 'ISC', 'MIT' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 0,
+          logs: [
+            {
+              message: 'Not allowed license: WTFPL',
+              type: LogType.ERROR
+            }
+          ]
+        });
+      });
+
+      it('with license not included OR', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT OR WTFPL', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [ 'ISC' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 0,
+          logs: [
+            {
+              message: 'Not allowed license: MIT',
+              type: LogType.ERROR
+            },
+            {
+              message: 'Not allowed license: WTFPL',
               type: LogType.ERROR
             }
           ]
@@ -437,10 +698,10 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
-          rule: { include: [ 'license' ] },
+          rule: { include: [ 'MIT' ] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
@@ -459,10 +720,10 @@ describe('evaluators', () => {
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
-          rule: { include: [ 'license2', 'LICENSE' ] },
+          rule: { include: [ 'ISC', 'MIT' ] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
@@ -476,15 +737,59 @@ describe('evaluators', () => {
         });
       });
 
-      it('with license included 3', async () => {
+      it('with license included AND', async () => {
         const result = license({
           node: {
             name: 'name',
             version: 'version',
-            license: { type: 'LicensE', hasLicenseFile: false, isPrivate: false },
+            license: { type: 'MIT AND ISC', hasLicenseFile: false, isPrivate: false },
             dependencies: []
           },
-          rule: { include: [ 'license2', 'LICENSE' ] },
+          rule: { include: [ 'ISC', 'MIT' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
+
+      it('with license included AND', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT AND ISC', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [ 'ISC', 'MIT' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
+
+      it('with license included OR', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'MIT OR ISC', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [ 'MIT' ] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
