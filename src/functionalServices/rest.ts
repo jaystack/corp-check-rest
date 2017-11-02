@@ -8,8 +8,8 @@ import { FileStorage } from '../stores/s3filestorages';
 
 import { PackageInfoApi } from '../api/packageInfo';
 import { EvaluationsApi } from '../api/evaluations';
+import { PopularPackageNames } from '../services/popularPackageNames';
 import { PackageInfo, EvaluationInfo, StateType } from '../types';
-import { popularPackageNames } from '../consts';
 
 import { CorpCheckRestService } from './corpCheckRestService';
 
@@ -95,9 +95,11 @@ export class Package extends CorpCheckRestService {
 @rest({ path: '/popular-packages', methods: [ 'get' ], anonymous: true, cors: true })
 export class PopularPackages extends CorpCheckRestService {
   public async handle(
+    @inject(PopularPackageNames) popularPackageNameService,
     @inject(PackageInfoApi) packageInfoApi: PackageInfoApi,
     @inject(EvaluationsApi) evaluationsApi: EvaluationsApi
   ) {
+    const popularPackageNames = await popularPackageNameService();
     const evaluations = await evaluationsApi.getByNames(popularPackageNames);
     const duplicateFilteredEvaluations = evaluations.reduce((acc, evaluation) => {
       const precedent = acc.find(
