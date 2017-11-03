@@ -18,6 +18,7 @@ import { Evaluate } from '../src/services/evaluate';
 import { GetNpmInfo } from '../src/services/npm';
 import { ValidationStart } from '../src/services/validationStart';
 import { AssertQueue, PublishToQueue } from '../src/services/rabbitMQ';
+import { GetRuleSet } from '../src/services/defaultRuleSet';
 
 describe('services', () => {
   describe('Badge', () => {
@@ -1970,9 +1971,9 @@ describe('services', () => {
     });
 
     it('name changed registry', async () => {
-      const npm_registry_url = 'customUrl'
-      expect(process.env.NPM_REGISTRY_URL).toEqual(undefined)
-      process.env.NPM_REGISTRY_URL = npm_registry_url
+      const npm_registry_url = 'customUrl';
+      expect(process.env.NPM_REGISTRY_URL).toEqual(undefined);
+      process.env.NPM_REGISTRY_URL = npm_registry_url;
 
       const mockResult = {
         name: 'name',
@@ -1992,10 +1993,10 @@ describe('services', () => {
       expect(request).lastCalledWith({
         uri: 'customUrl/name',
         json: true
-      })
+      });
 
-      delete process.env.NPM_REGISTRY_URL
-      expect(process.env.NPM_REGISTRY_URL).toEqual(undefined)
+      delete process.env.NPM_REGISTRY_URL;
+      expect(process.env.NPM_REGISTRY_URL).toEqual(undefined);
     });
 
     it('name@version', async () => {
@@ -2824,6 +2825,27 @@ describe('services', () => {
           payload: 'payload',
           payload_encoding: 'string'
         }
+      });
+    });
+  });
+
+  describe('GetRuleSet', () => {
+    let getRuleSet: GetRuleSet = null;
+    beforeAll(() => {
+      getRuleSet = container.resolve(GetRuleSet);
+    });
+
+    it('default ruleSet', async () => {
+      const res = await getRuleSet.handle(undefined);
+      expect(res).toEqual(require('../../default-rules'));
+    });
+
+    it('extended default ruleSet', async () => {
+      const ruleSet: any = { custom: 1 };
+      const res = await getRuleSet.handle(ruleSet);
+      expect(res).toEqual({
+        ...require('../../default-rules'),
+        custom: 1
       });
     });
   });
