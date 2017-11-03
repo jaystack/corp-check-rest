@@ -62,16 +62,11 @@ const getLogs = (node: Node, { include, exclude, licenseRequired }: LicenseRule)
 
   const license = node.license.type;
 
-  if (!valid(license)) {
-    return [
-      {
-        message: `Invalid license: ${node.license.type}`,
-        type: LogType.ERROR
-      } as Log
-    ];
+  let tree = { license };
+  if (valid(license)) {
+    tree = parse(license);
   }
 
-  const tree = parse(license);
   return validateLicense({ tree, node, exclude, include });
 };
 

@@ -153,6 +153,28 @@ describe('evaluators', () => {
           logs: []
         });
       });
+
+      it('non spdx license', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'mit', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: {},
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
     });
 
     describe('licenseRequired', () => {
@@ -451,6 +473,55 @@ describe('evaluators', () => {
             dependencies: []
           },
           rule: { exclude: [ 'ISC', 'MIT' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
+
+      it('with non spdx license included', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { exclude: [ 'MIT', 'license' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 0,
+          logs: [
+            {
+              message: 'Forbidden license: license',
+              type: LogType.ERROR
+            }
+          ]
+        });
+      });
+
+      it('with non spdx license not included', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { exclude: [ 'ISC' ] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
@@ -812,6 +883,55 @@ describe('evaluators', () => {
             dependencies: []
           },
           rule: { include: [ 'MIT' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 1,
+          logs: []
+        });
+      });
+
+      it('with non spdx license not included', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [ 'ISC' ] },
+          depth: undefined,
+          packageMeta: undefined,
+          unknownPackages: []
+        });
+
+        expect(result).toEqual({
+          name: 'license',
+          description: '',
+          score: 0,
+          logs: [
+            {
+              message: 'Not allowed license: license',
+              type: LogType.ERROR
+            }
+          ]
+        });
+      });
+
+      it('with license included', async () => {
+        const result = license({
+          node: {
+            name: 'name',
+            version: 'version',
+            license: { type: 'license', hasLicenseFile: false, isPrivate: false },
+            dependencies: []
+          },
+          rule: { include: [ 'MIT', 'license' ] },
           depth: undefined,
           packageMeta: undefined,
           unknownPackages: []
