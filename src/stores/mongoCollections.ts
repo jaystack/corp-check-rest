@@ -59,3 +59,7 @@ export class Evaluations extends MongoCollection {}
 @injectable()
 @mongoCollection({ collectionName: '%ClassName%_corp_check' })
 export class ModuleMetadataCache extends MongoCollection {}
+
+@injectable()
+@mongoCollection({ collectionName: '%ClassName%_corp_check' })
+export class PopularPackageNames extends MongoCollection {}
