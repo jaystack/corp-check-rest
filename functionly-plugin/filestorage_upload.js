@@ -66,13 +66,6 @@ module.exports = {
             );
             await uploadfile(
               s3,
-              '../content/images/status/corp-check-not-recommended.svg',
-              'images/status/corp-check-not-recommended.svg',
-              context.stage,
-              logger
-            );
-            await uploadfile(
-              s3,
               '../content/images/status/corp-check-recommended.svg',
               'images/status/corp-check-recommended.svg',
               context.stage,
