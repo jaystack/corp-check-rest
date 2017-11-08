@@ -797,6 +797,214 @@ describe('services', () => {
       });
     });
 
+    it('does filter corp-check-cli itself', async () => {
+      license.mockReturnValue({ score: 1 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
+        },
+        tree: {
+          name: 'corp-check-cli',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'name',
+              version: 'version',
+              license: undefined,
+              dependencies: []
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'corp-check-cli',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 1,
+          dependencies: [
+            {
+              nodeName: 'name',
+              nodeVersion: 'version',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: []
+            }
+          ]
+        },
+        qualification: Qualification.RECOMMENDED
+      });
+    });
+
+    it('filters corp-check packages from first dependencies', async () => {
+      license.mockReturnValue({ score: 1 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
+        },
+        tree: {
+          name: 'name',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'corp-check-cli',
+              version: 'version',
+              license: undefined,
+              dependencies: []
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 1,
+          dependencies: []
+        },
+        qualification: Qualification.RECOMMENDED
+      });
+    });
+
+    it('filters corp-check packages from deeper dependencies', async () => {
+      license.mockReturnValue({ score: 1 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
+        },
+        tree: {
+          name: 'name1',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'name2',
+              version: 'version',
+              license: undefined,
+              dependencies: [
+                {
+                  name: 'corp-check-core',
+                  version: 'version',
+                  license: undefined,
+                  dependencies: []
+                }
+              ]
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name1',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 1,
+          dependencies: [
+            {
+              nodeName: 'name2',
+              nodeVersion: 'version',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: []
+            }
+          ]
+        },
+        qualification: Qualification.RECOMMENDED
+      });
+    });
+
+    it('filters corp-check packages from deeper multiple dependencies', async () => {
+      license.mockReturnValue({ score: 1 });
+      version.mockReturnValue({ score: 1 });
+      npmScores.mockReturnValue({ score: 1 });
+
+      const data = {
+        meta: {
+          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
+        },
+        tree: {
+          name: 'name1',
+          version: 'version',
+          license: undefined,
+          dependencies: [
+            {
+              name: 'name2',
+              version: 'version',
+              license: undefined,
+              dependencies: [
+                {
+                  name: 'corp-check-core',
+                  version: 'version',
+                  license: undefined,
+                  dependencies: []
+                },
+                {
+                  name: 'name3',
+                  version: 'version',
+                  license: undefined,
+                  dependencies: []
+                }
+              ]
+            }
+          ]
+        },
+        unknownPackages: []
+      };
+      const ruleSet = { license: { license: 1 }, version: { version: 1 }, npmScores: { npmScores: 1 } };
+
+      const res = await evaluate.handle(data, ruleSet);
+      expect(res).toEqual({
+        rootEvaluation: {
+          nodeName: 'name1',
+          nodeVersion: 'version',
+          evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+          nodeScore: 1,
+          dependencies: [
+            {
+              nodeName: 'name2',
+              nodeVersion: 'version',
+              evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+              nodeScore: 1,
+              dependencies: [
+                {
+                  nodeName: 'name3',
+                  nodeVersion: 'version',
+                  evaluations: [ { score: 1 }, { score: 1 }, { score: 1 } ],
+                  nodeScore: 1,
+                  dependencies: []
+                }
+              ]
+            }
+          ]
+        },
+        qualification: Qualification.RECOMMENDED
+      });
+    });
+
     it('self score', async () => {
       license.mockReturnValue({ score: 1 });
       version.mockReturnValue({ score: 1 });

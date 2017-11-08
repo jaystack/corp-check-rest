@@ -15,6 +15,7 @@ import version from '../evaluators/version';
 import npmScores from '../evaluators/npmScores';
 
 const A = 1;
+const corpCheckPackages = [ 'corp-check-core', 'corp-check-cli' ];
 
 const qualificate = (finalScore: number): Qualification => {
   if (finalScore >= 0.5) return Qualification.RECOMMENDED;
@@ -58,12 +59,25 @@ const evaluate = (
   } as NodeEvaluation;
 };
 
+const filterCorpCheckPackages = (node: Node, depth = 0): Node => {
+  if (depth === 0 && corpCheckPackages.includes(node.name)) return node;
+  return {
+    name: node.name,
+    version: node.version,
+    license: node.license,
+    dependencies: node.dependencies
+      .filter(({ name }) => !corpCheckPackages.includes(name))
+      .map(dependency => filterCorpCheckPackages(dependency, depth + 1))
+  };
+};
+
 @injectable(InjectionScope.Singleton)
 export class Evaluate extends Service {
   public async handle(@param data, @param ruleSet) {
     const evaluators: Evaluator[] = [ license, version, npmScores ];
     const rules = [ ruleSet.license, ruleSet.version, ruleSet.npmScores ];
-    const rootEvaluation = evaluate(evaluators, rules, data.meta, data.tree, data.unknownPackages);
+    const treeWithoutCorpCheckPackages = filterCorpCheckPackages(data.tree);
+    const rootEvaluation = evaluate(evaluators, rules, data.meta, treeWithoutCorpCheckPackages, data.unknownPackages);
     return {
       rootEvaluation,
       qualification: qualificate(rootEvaluation.nodeScore)
