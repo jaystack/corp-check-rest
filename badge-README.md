@@ -1,5 +1,5 @@
 # Badges
-badge service for corp-check
+Show the world that your package passes the Corp-Check tests! By putting the "recommended" badge in your package README, you can notify developers that it is safe to use your module: it has proper licensing, it is actually released and you care about its popularity.
 
 ## How to use
 Badge for [Repatch](https://www.npmjs.com/package/repatch) [![corp-check status](https://api.corp-check.corpjs.com/badge?name=repatch)](https://corp-check.corpjs.com/result?name=repatch)
@@ -13,7 +13,7 @@ Badge for [Repatch](https://www.npmjs.com/package/repatch) [![corp-check status]
 https://api.corp-check.corpjs.com/badge?name=repatch
 ```
 
-## Url for the corp-check result:
+## Url for the Corp-Check result:
 ```
 https://corp-check.corpjs.com/result?name=repatch
 ```

@@ -1,6 +1,6 @@
 # Rule configuration
 
-CorpCheck evaluations are made by **evaluators**. Evaluators are functional separated modules that can return error, warning and info logs, and can give sub-scores to the package. These sub-scores are multiplied to each other, and these multiplied scores constitute the final score of the evaluated package including its dependencies' scores.
+Corp-Check evaluations are made by **evaluators**. Evaluators are functional separated modules that can return error, warning and info logs, and can give sub-scores to the package. These sub-scores are multiplied to each other, and these multiplied scores constitute the final score of the evaluated package including its dependencies' scores.
 
 Every evaluator is configurable by their rules. They make the entire **ruleset**. The ruleset is defined in `json` format:
 
