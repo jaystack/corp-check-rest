@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const { join, normalize } = require('path');
 const fs = require('fs');
 
-const uploadfile = async (s3, from, to, stage, logger) => {
+const uploadfile = async (s3, from, to, stage, logger, metadata) => {
   const filepath = normalize(join(__dirname, from));
   return new Promise((resolve, reject) => {
     fs.readFile(filepath, function(err, Body) {
@@ -16,7 +16,8 @@ const uploadfile = async (s3, from, to, stage, logger) => {
           Key: to,
           Bucket: `corp-check-rest-filestorage-${stage}`,
           Body,
-          ACL: 'public-read'
+          ACL: 'public-read',
+          Metadata: metadata || {}
         },
         (err, result) => {
           if (err) {
@@ -43,40 +44,47 @@ module.exports = {
           });
 
           if (!context.packageOnly) {
+            var svgMetadata = { 'Content-Type': 'image/svg+xml' };
+
             await uploadfile(
               s3,
               '../content/images/status/corp-check-accepted.svg',
               'images/status/corp-check-accepted.svg',
               context.stage,
-              logger
+              logger,
+              svgMetadata
             );
             await uploadfile(
               s3,
               '../content/images/status/corp-check-failed.svg',
               'images/status/corp-check-failed.svg',
               context.stage,
-              logger
+              logger,
+              svgMetadata
             );
             await uploadfile(
               s3,
               '../content/images/status/corp-check-inprogress.svg',
               'images/status/corp-check-inprogress.svg',
               context.stage,
-              logger
+              logger,
+              svgMetadata
             );
             await uploadfile(
               s3,
               '../content/images/status/corp-check-recommended.svg',
               'images/status/corp-check-recommended.svg',
               context.stage,
-              logger
+              logger,
+              svgMetadata
             );
             await uploadfile(
               s3,
               '../content/images/status/corp-check-rejected.svg',
               'images/status/corp-check-rejected.svg',
               context.stage,
-              logger
+              logger,
+              svgMetadata
             );
           }
         }
