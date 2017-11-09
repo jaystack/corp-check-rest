@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const { join, normalize } = require('path');
 const fs = require('fs');
 
-const uploadfile = async (s3, from, to, stage, logger, metadata) => {
+const uploadfile = async (s3, from, to, stage, logger, contentType) => {
   const filepath = normalize(join(__dirname, from));
   return new Promise((resolve, reject) => {
     fs.readFile(filepath, function(err, Body) {
@@ -17,7 +17,7 @@ const uploadfile = async (s3, from, to, stage, logger, metadata) => {
           Bucket: `corp-check-rest-filestorage-${stage}`,
           Body,
           ACL: 'public-read',
-          Metadata: metadata || {}
+          ContentType: contentType
         },
         (err, result) => {
           if (err) {
@@ -44,7 +44,7 @@ module.exports = {
           });
 
           if (!context.packageOnly) {
-            var svgMetadata = { 'Content-Type': 'image/svg+xml' };
+            var svgContentType = 'image/svg+xml';
 
             await uploadfile(
               s3,
@@ -52,7 +52,7 @@ module.exports = {
               'images/status/corp-check-accepted.svg',
               context.stage,
               logger,
-              svgMetadata
+              svgContentType
             );
             await uploadfile(
               s3,
@@ -60,7 +60,7 @@ module.exports = {
               'images/status/corp-check-failed.svg',
               context.stage,
               logger,
-              svgMetadata
+              svgContentType
             );
             await uploadfile(
               s3,
@@ -68,7 +68,7 @@ module.exports = {
               'images/status/corp-check-inprogress.svg',
               context.stage,
               logger,
-              svgMetadata
+              svgContentType
             );
             await uploadfile(
               s3,
@@ -76,7 +76,7 @@ module.exports = {
               'images/status/corp-check-recommended.svg',
               context.stage,
               logger,
-              svgMetadata
+              svgContentType
             );
             await uploadfile(
               s3,
@@ -84,7 +84,7 @@ module.exports = {
               'images/status/corp-check-rejected.svg',
               context.stage,
               logger,
-              svgMetadata
+              svgContentType
             );
           }
         }
