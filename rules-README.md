@@ -16,14 +16,14 @@ Every evaluator is configurable by their rules. They make the entire **ruleset**
 
 ### License rules
 
-That makes the license validation. It throws error, if unallowed license was found in the dependency hierarchy.
+This defines the ruleset of license validation. If there's a not allowed license in any of the dependencies, it yields an error.
 
 The property set is:
 
 - **`include`**: `string[]` - Defines allowed licenses.
 - **`exclude`**: `string[]` - Unallows specified licenses.
-- **`licenseRequired`**: `boolean` - If `true` and no license found at a package, the evaluator throws error.
-- **`depth`**: `number` - Determines the depth of the evaluation. `0` is the package itselft, `1` means the first dependencies, etc. Set it `null` to interpret as infinity.
+- **`licenseRequired`**: `boolean` - If `true` and no license is found in the package, the evaluator throws an error.
+- **`depth`**: `number` - Determines the depth of the evaluation. `0` is the package itself, `1` means the first dependencies, etc. Set it `null` to interpret as infinity.
 
 Example:
 
@@ -40,13 +40,13 @@ Example:
 
 ### Version rules
 
-That makes the version validation. It throws error, if unreleased package was found in the first dependencies, and send warning, if they were found deeper.
+This performs the version validation. If an unreleased package is found in the first dependencies it yields an error; while it only sends a warning if it was found in a deeper dependency.
 
 The property set is:
 
-- **`minVersion`**: `string[]` - Defines the minimum version that is required from a package.
-- **`isRigorous`**: `boolean` - If `true`, the evaluator throws error if package was found below the `minVersion`.
-- **`rigorousDepth`**: `number` - Determines the depth of the rigorous check. `0` is the package itself, `1` means the first dependencies, etc.
+- **`minVersion`**: `string[]` - Defines the minimum accepted version that is required in a package.
+- **`isRigorous`**: `boolean` - If `true`, the evaluator yields an error if a package was found with version number less than `minVersion`.
+- **`rigorousDepth`**: `number` - Determines how rigorous the validation is. `0` means it's only the package itself, `1` means it also inspect the first dependencies, and so on.
 - **`retributionScore`**: `number` - This score is given to the package which is below the `minVersion`, if the checking is not rigorous.
 
 Example:
@@ -64,7 +64,7 @@ Example:
 
 ### NpmScores rules
 
-That provides the `popularity`, `quality` and `maintance` scores. The final score of the `npmScores` is calculated by weighted average.
+This provides the `popularity`, `quality` and `maintenance` scores. The final value of the `npmScores` is calculated using weighted average.
 
 The property set is:
 
