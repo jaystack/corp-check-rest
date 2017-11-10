@@ -8,9 +8,9 @@ This is an example Recommended Badge for [Repatch](https://www.npmjs.com/package
 [![corp-check status](https://api.corp-check.corpjs.com/badge?name=repatch)](https://corp-check.corpjs.com/result?name=repatch)
 ```
 
-This is an Accepted sample Badge, meaning warnings have been found but no serious issues: ![corp-check status](https://corp-check-rest-filestorage-prod.s3.amazonaws.com/images/status/corp-check-accepted.svg)
+This is an Accepted sample Badge, meaning warnings have been found but no serious issues: ![corp-check status](https://resources.corp-check.corpjs.com/images/status/corp-check-accepted.svg)
 
-This is how a Rejected sample Badge looks like: ![corp-check status](https://corp-check-rest-filestorage-prod.s3.amazonaws.com/images/status/corp-check-rejected.svg)
+This is how a Rejected sample Badge looks like: ![corp-check status](https://resources.corp-check.corpjs.com/images/status/corp-check-rejected.svg)
 
 ## Api endpoint for badges:
 ```
