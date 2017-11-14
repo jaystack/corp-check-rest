@@ -44,7 +44,11 @@ export class KMSResolveRabbitMQServiceUrl extends Api {
 
 @injectable(InjectionScope.Singleton)
 export class AssertQueue extends Service {
-  public async handle(@param queue, @param queueArguments, @inject(KMSResolveRabbitMQServiceUrl) kmsServiceUrl: KMSResolveRabbitMQServiceUrl) {
+  public async handle(
+    @param queue,
+    @param queueArguments,
+    @inject(KMSResolveRabbitMQServiceUrl) kmsServiceUrl: KMSResolveRabbitMQServiceUrl
+  ) {
     const serviceUrl = await kmsServiceUrl.getUrl();
 
     try {
@@ -55,7 +59,7 @@ export class AssertQueue extends Service {
         body: { vhost: '/', name: 'queue', durable: 'true', auto_delete: 'false', arguments: queueArguments || {} }
       });
     } catch (e) {
-      console.log(e)
+      console.log(e);
       throw new Error('RabbitApiError');
     }
   }
@@ -84,12 +88,52 @@ export class PublishToQueue extends Service {
         }
       });
     } catch (e) {
-      console.log(e)
+      console.log(e);
       throw new Error('RabbitApiError');
     }
 
     if (!info.routed) {
       throw new Error('RabbitMessageToQueue');
     }
+  }
+}
+
+@injectable(InjectionScope.Singleton)
+export class HealthCheck extends Service {
+  public async handle(@inject(KMSResolveRabbitMQServiceUrl) kmsServiceUrl: KMSResolveRabbitMQServiceUrl) {
+    const serviceUrl = await kmsServiceUrl.getUrl();
+    let info: any = null;
+    try {
+      info = await request({
+        uri: `${serviceUrl}/api/healthchecks/node`,
+        method: 'GET',
+        json: true
+      });
+    } catch (e) {
+      console.log(e);
+      throw new Error('RabbitApiError - HealthCheck');
+    }
+
+    return info;
+  }
+}
+
+@injectable(InjectionScope.Singleton)
+export class GetConsumers extends Service {
+  public async handle(@param vHost, @inject(KMSResolveRabbitMQServiceUrl) kmsServiceUrl: KMSResolveRabbitMQServiceUrl) {
+    const serviceUrl = await kmsServiceUrl.getUrl();
+    let info: any = null;
+    try {
+      info = await request({
+        uri: `${serviceUrl}/api/consumers/${vHost}`,
+        method: 'GET',
+        json: true
+      });
+    } catch (e) {
+      console.log(e);
+      throw new Error('RabbitApiError - GetConsumers');
+    }
+
+    return info;
   }
 }

@@ -2,6 +2,7 @@ import { Validation, Package, PopularPackages, Suggestion, BadgeService, StressT
 import { Complete, Progress } from './functionalServices/workerComplete';
 import { GetModuleMeta } from './functionalServices/moduleMetaCache';
 import { CheckPopularPackages } from './functionalServices/checkPopularPackages';
+import { HealthCheckService } from './functionalServices/healthcheck';
 
 export const validation = Validation.createInvoker();
 export const packageInfo = Package.createInvoker();
@@ -16,4 +17,6 @@ export const progress = Progress.createInvoker();
 export const getModuleMeta = GetModuleMeta.createInvoker();
 
 export const checkPopularPackages = CheckPopularPackages.createInvoker();
+
+export const healthCheckService = HealthCheckService.createInvoker();
 
