@@ -44,7 +44,7 @@ export class KMSResolveRabbitMQServiceUrl extends Api {
 
 @injectable(InjectionScope.Singleton)
 export class AssertQueue extends Service {
-  public async handle(@param queue, @inject(KMSResolveRabbitMQServiceUrl) kmsServiceUrl: KMSResolveRabbitMQServiceUrl) {
+  public async handle(@param queue, @param queueArguments, @inject(KMSResolveRabbitMQServiceUrl) kmsServiceUrl: KMSResolveRabbitMQServiceUrl) {
     const serviceUrl = await kmsServiceUrl.getUrl();
 
     try {
@@ -52,7 +52,7 @@ export class AssertQueue extends Service {
         uri: `${serviceUrl}/api/queues/%2F/${queue}`,
         method: 'PUT',
         json: true,
-        body: { vhost: '/', name: 'queue', durable: 'true', auto_delete: 'false', arguments: {} }
+        body: { vhost: '/', name: 'queue', durable: 'true', auto_delete: 'false', arguments: queueArguments || {} }
       });
     } catch (e) {
       console.log(e)
@@ -66,6 +66,7 @@ export class PublishToQueue extends Service {
   public async handle(
     @param queue,
     @param payload,
+    @param properties,
     @inject(KMSResolveRabbitMQServiceUrl) kmsServiceUrl: KMSResolveRabbitMQServiceUrl
   ) {
     const serviceUrl = await kmsServiceUrl.getUrl();
@@ -76,7 +77,7 @@ export class PublishToQueue extends Service {
         method: 'POST',
         json: true,
         body: {
-          properties: {},
+          properties: properties || {},
           routing_key: queue,
           payload,
           payload_encoding: 'string'

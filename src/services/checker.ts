@@ -44,6 +44,7 @@ export class IsExpiredResult extends Service {
 
 @injectable(InjectionScope.Singleton)
 @environment('RABBITMQ_QUEUE_NAME', 'tasks')
+@environment('RABBITMQ_MESSAGE_EXPIRATION', '600000')
 export class StartPackageValidation extends Service {
   public async handle(
     @param cid,
@@ -58,7 +59,7 @@ export class StartPackageValidation extends Service {
   ) {
     const queue = `${process.env.RABBITMQ_QUEUE_NAME}-${stage}`;
 
-    await assertQueue({ queue });
+    await assertQueue({ queue, queueArguments: { 'x-dead-letter-exchange': `${queue}.exchange.dead` } });
     await publishToQueue({
       queue,
       payload: JSON.stringify({
@@ -67,7 +68,10 @@ export class StartPackageValidation extends Service {
         production: isProduction,
         packageLock: packageLock,
         yarnLock: yarnLock
-      })
+      }),
+      properties: {
+        expiration: process.env.RABBITMQ_MESSAGE_EXPIRATION || '600000'
+      }
     });
   }
 }

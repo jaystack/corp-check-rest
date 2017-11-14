@@ -377,12 +377,15 @@ describe('services', () => {
 
       const assertQueue: any = params => {
         counter++;
-        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          queueArguments: { 'x-dead-letter-exchange': `${taskName}-${stage}.exchange.dead` }
+        });
       };
 
       const publishToQueue: any = params => {
         counter++;
-        expect(params).toEqual({ queue: `${taskName}-${stage}`, payload: '{}' });
+        expect(params).toEqual({ queue: `${taskName}-${stage}`, payload: '{}', properties: { expiration: '600000' } });
       };
 
       const res = await startPackageValidation.handle(
@@ -413,7 +416,10 @@ describe('services', () => {
 
       const assertQueue: any = params => {
         counter++;
-        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          queueArguments: { 'x-dead-letter-exchange': `${taskName}-${stage}.exchange.dead` }
+        });
       };
 
       const publishToQueue: any = params => {
@@ -423,7 +429,8 @@ describe('services', () => {
           payload: JSON.stringify({
             cid: '1',
             pkg: 'packageName'
-          })
+          }),
+          properties: { expiration: '600000' }
         });
       };
 
@@ -455,7 +462,10 @@ describe('services', () => {
 
       const assertQueue: any = params => {
         counter++;
-        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          queueArguments: { 'x-dead-letter-exchange': `${taskName}-${stage}.exchange.dead` }
+        });
       };
 
       const publishToQueue: any = params => {
@@ -465,7 +475,8 @@ describe('services', () => {
           payload: JSON.stringify({
             cid: '1',
             pkg: 'packageJSONstring'
-          })
+          }),
+          properties: { expiration: '600000' }
         });
       };
 
@@ -497,7 +508,10 @@ describe('services', () => {
 
       const assertQueue: any = params => {
         counter++;
-        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          queueArguments: { 'x-dead-letter-exchange': `${taskName}-${stage}.exchange.dead` }
+        });
       };
 
       const publishToQueue: any = params => {
@@ -507,7 +521,8 @@ describe('services', () => {
           payload: JSON.stringify({
             cid: '1',
             pkg: 'packageJSONstring'
-          })
+          }),
+          properties: { expiration: '600000' }
         });
       };
 
@@ -539,7 +554,10 @@ describe('services', () => {
 
       const assertQueue: any = params => {
         counter++;
-        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          queueArguments: { 'x-dead-letter-exchange': `${taskName}-${stage}.exchange.dead` }
+        });
       };
 
       const publishToQueue: any = params => {
@@ -550,7 +568,8 @@ describe('services', () => {
             cid: '1',
             pkg: 'packageJSONstring',
             packageLock: 'packageLockContent'
-          })
+          }),
+          properties: { expiration: '600000' }
         });
       };
 
@@ -582,7 +601,10 @@ describe('services', () => {
 
       const assertQueue: any = params => {
         counter++;
-        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          queueArguments: { 'x-dead-letter-exchange': `${taskName}-${stage}.exchange.dead` }
+        });
       };
 
       const publishToQueue: any = params => {
@@ -593,7 +615,8 @@ describe('services', () => {
             cid: '1',
             pkg: 'packageJSONstring',
             yarnLock: 'yarnLockContent'
-          })
+          }),
+          properties: { expiration: '600000' }
         });
       };
 
@@ -625,7 +648,10 @@ describe('services', () => {
 
       const assertQueue: any = params => {
         counter++;
-        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          queueArguments: { 'x-dead-letter-exchange': `${taskName}-${stage}.exchange.dead` }
+        });
       };
 
       const publishToQueue: any = params => {
@@ -636,7 +662,8 @@ describe('services', () => {
             cid: '1',
             pkg: 'packageJSONstring',
             production: true
-          })
+          }),
+          properties: { expiration: '600000' }
         });
       };
 
@@ -668,7 +695,10 @@ describe('services', () => {
 
       const assertQueue: any = params => {
         counter++;
-        expect(params).toEqual({ queue: `${taskName}-${stage}` });
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          queueArguments: { 'x-dead-letter-exchange': `${taskName}-${stage}.exchange.dead` }
+        });
       };
 
       const publishToQueue: any = params => {
@@ -679,7 +709,8 @@ describe('services', () => {
             cid: '1',
             pkg: 'packageJSONstring',
             production: false
-          })
+          }),
+          properties: { expiration: '600000' }
         });
       };
 
@@ -699,6 +730,58 @@ describe('services', () => {
 
       delete process.env.RABBITMQ_QUEUE_NAME;
       expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+    });
+
+    it('message expiration', async () => {
+      const taskName = 'tasks';
+      const stage = 'test';
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+      process.env.RABBITMQ_QUEUE_NAME = taskName;
+      const expirationValue = "10000"
+      expect(process.env.RABBITMQ_MESSAGE_EXPIRATION).toEqual(undefined);
+      process.env.RABBITMQ_MESSAGE_EXPIRATION = expirationValue;
+
+      let counter = 0;
+
+      const assertQueue: any = params => {
+        counter++;
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          queueArguments: { 'x-dead-letter-exchange': `${taskName}-${stage}.exchange.dead` }
+        });
+      };
+
+      const publishToQueue: any = params => {
+        counter++;
+        expect(params).toEqual({
+          queue: `${taskName}-${stage}`,
+          payload: JSON.stringify({
+            cid: '1',
+            pkg: 'packageJSONstring'
+          }),
+          properties: { expiration: '10000' }
+        });
+      };
+
+      const res = await startPackageValidation.handle(
+        '1',
+        undefined,
+        'packageJSONstring',
+        undefined,
+        undefined,
+        undefined,
+        assertQueue,
+        publishToQueue,
+        stage
+      );
+      expect(res).toEqual(undefined);
+      expect(counter).toEqual(2);
+
+      delete process.env.RABBITMQ_QUEUE_NAME;
+      expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
+
+      delete process.env.RABBITMQ_MESSAGE_EXPIRATION;
+      expect(process.env.RABBITMQ_MESSAGE_EXPIRATION).toEqual(undefined);
     });
   });
 
@@ -2887,7 +2970,7 @@ describe('services', () => {
 
     it('no params', async () => {
       try {
-        const res = await assertQueue.handle(undefined, undefined);
+        const res = await assertQueue.handle(undefined, undefined, undefined);
         expect(false).toEqual(true);
       } catch (e) {
         expect(true).toEqual(true);
@@ -2903,13 +2986,13 @@ describe('services', () => {
         }
       };
 
-      const res = await assertQueue.handle('queue', kmsServiceUrl);
+      const res = await assertQueue.handle('queue', { qargs: 1 }, kmsServiceUrl);
       expect(res).toEqual(undefined);
       expect(request).lastCalledWith({
         uri: 'rabbitURL/api/queues/%2F/queue',
         method: 'PUT',
         json: true,
-        body: { vhost: '/', name: 'queue', durable: 'true', auto_delete: 'false', arguments: {} }
+        body: { vhost: '/', name: 'queue', durable: 'true', auto_delete: 'false', arguments: { qargs: 1 } }
       });
     });
 
@@ -2923,7 +3006,7 @@ describe('services', () => {
       };
 
       try {
-        const res = await assertQueue.handle('queue', kmsServiceUrl);
+        const res = await assertQueue.handle('queue', undefined, kmsServiceUrl);
       } catch (e) {
         expect(e.message).toEqual('RabbitApiError');
       }
@@ -2949,7 +3032,7 @@ describe('services', () => {
 
     it('no params', async () => {
       try {
-        const res = await publishToQueue.handle(undefined, undefined, undefined);
+        const res = await publishToQueue.handle(undefined, undefined, undefined, undefined);
         expect(false).toEqual(true);
       } catch (e) {
         expect(true).toEqual(true);
@@ -2965,14 +3048,14 @@ describe('services', () => {
         }
       };
 
-      const res = await publishToQueue.handle('queue', 'payload', kmsServiceUrl);
+      const res = await publishToQueue.handle('queue', 'payload', { props: 1 }, kmsServiceUrl);
       expect(res).toEqual(undefined);
       expect(request).lastCalledWith({
         uri: 'rabbitURL/api/exchanges/%2f/amq.default/publish',
         method: 'POST',
         json: true,
         body: {
-          properties: {},
+          properties: { props: 1 },
           routing_key: 'queue',
           payload: 'payload',
           payload_encoding: 'string'
@@ -2990,7 +3073,7 @@ describe('services', () => {
       };
 
       try {
-        const res = await publishToQueue.handle('queue', 'payload', kmsServiceUrl);
+        const res = await publishToQueue.handle('queue', 'payload', undefined, kmsServiceUrl);
       } catch (e) {
         expect(e.message).toEqual('RabbitApiError');
       }
@@ -3018,7 +3101,7 @@ describe('services', () => {
       };
 
       try {
-        const res = await publishToQueue.handle('queue', 'payload', kmsServiceUrl);
+        const res = await publishToQueue.handle('queue', 'payload', undefined, kmsServiceUrl);
       } catch (e) {
         expect(e.message).toEqual('RabbitMessageToQueue');
       }
