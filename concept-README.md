@@ -100,11 +100,44 @@ For now we have the following evaluators:
 
 And they give the following scores:
 
+<!--
 |                 | A   | B   | C   | D   |
 |-----------------|-----|-----|-----|-----|
 | License score   | 1   | 1   | 1   | 0   |
 | Version score   | 1   | 0.5 | 1   | 1   |
 | Attribute score | 0.4 | 0.3 | 0.6 | 0.7 |
+-->
+
+<table>
+  <tr>
+    <td></td>
+    <td><b>A</b></td>
+    <td><b>B</b></td>
+    <td><b>C</b></td>
+    <td><b>D</b></td>
+  </tr>
+  <tr>
+    <td>License score</td>
+    <td>1</td>
+    <td>1</td>
+    <td>1</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td>Version score</td>
+    <td>1</td>
+    <td>0.5</td>
+    <td>1</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>Attribute score</td>
+    <td>0.4</td>
+    <td>0.3</td>
+    <td>0.6</td>
+    <td>0.7</td>
+  </tr>
+</table>
 
 Then the self-score of `D` is `0 × 1 × 0.7 = 0`. Its final score is the same, because it does not have any dependency. The self score of `C` is `0.6`, but its final score is `0`, because the minimum of `0.6` and `√0` is `0`. By following this line of thought we can consider that `A` also takes zero as final score. Notice, that the final score of `A` is the root final score.
 
