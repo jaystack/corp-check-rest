@@ -20,11 +20,11 @@ Corp-Check provides an open-source solution for these problems above. **Corp-Che
 
 This is useful for quick check an NPM package or a `package.json`. The application summarizes the result in descriptive forms.
 
-![summary](https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/summary.png)
+<img alt="summary" src="https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/summary.png" width="100%" />
 
 The application is also be able to show the result in a detailed interactive view:
 
-![detailed-view](https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/detailed-view.png)
+<img alt="detailed-view" src="https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/detailed-view.png" width="100%" />
 
 ## Corp-Check [Command Line Interface](https://www.npmjs.com/package/corp-check-cli)
 
