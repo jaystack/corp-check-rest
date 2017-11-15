@@ -172,3 +172,8 @@ Corp-Check services are keeping in the cache, the package info and the related e
 Of course, cache has the expiration, which ensures, that upgrading deeply nested dependencies can cause change for the complete evaluation, similar to changing the popularity or any other attributes.
 
 Notice, that the cache is bounded to a specified version of an NPM module.
+
+The Corp-Check services have two emphatic expiration timeout:
+
+- The package **attribute values** from NPM are cached for **a week**.
+- An **evaluation** tied to a specified version and ruleset are cached for **30 days**.
