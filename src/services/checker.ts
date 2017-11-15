@@ -7,7 +7,7 @@ import * as AWS from 'aws-sdk';
 import { AssertQueue, PublishToQueue } from './rabbitMQ';
 
 @injectable(InjectionScope.Singleton)
-@environment('PACKAGE_PENDING_EXPIRATION_IN_MINUTES', '10')
+@environment('PACKAGE_VALIDATION_EXPIRATION_IN_DAYS', '30')
 export class IsExpiredResult extends Service {
   public async handle(
     @param packageInfo: PackageInfo,

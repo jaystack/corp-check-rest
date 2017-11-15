@@ -8,7 +8,7 @@ import { PackageInfo, StateType } from '../types';
 const NPM_PACKAGE_NAME_PATTERN = /^((@([^@]+)\/)?([^@]+))(@(.*))?$/;
 
 @injectable(InjectionScope.Singleton)
-@environment('PACKAGE_VALIDATION_EXPIRATION_IN_DAYS', '30')
+@environment('PACKAGE_PENDING_EXPIRATION_IN_MINUTES', '10')
 export class PackageInfoApi extends Api {
   private pendingMaxMinutes = 10;
   constructor(

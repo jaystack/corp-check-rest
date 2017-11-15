@@ -46,11 +46,11 @@ export class HealthCheckService extends CorpCheckRestService {
     try {
       // mongo connect
       await mongoConnection.connect();
-
-      return { status: 200, data: { state: 'ok' } };
     } catch (e) {
       console.log('mongo connection error', e);
       return { status: 500, data: { state: 'failed', reason: 'mongo connection' } };
     }
+
+    return { status: 200, data: { state: 'ok' } };
   }
 }
