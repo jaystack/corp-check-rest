@@ -1,5 +1,3 @@
-# Corp-Check
-
 ## Motivation
 
 The Node package management has unpredictable dangers. These dangers mostly stem from that the developers of the packages do not provide proper maintenance. Sometimes they do not keep the versioning rules, and a package might break below a minor or patch upgrade. These troubles are unpredictable, but the probability of that is mostly predictable. For example, if you rely on a package that is never released above 1.0, you probably use a beta version or the maintainer is not enough prudent, and you can not expect a proper maintenance in the future. Popularity should be treated in the same way, which may be a guarantee of the quality.
@@ -15,38 +13,6 @@ The principal creed should be:
 This statement is true likewise for every application, every service, etc.
 
 Corp-Check provides an open-source solution for these problems above. **Corp-Check validates a given NPM module or a `package.json` including dependencies in its entire depth.** It has two available interfaces for use:
-
-## Corp-Check [Web Application](https://corp-check.corpjs.com/npm)
-
-This is useful for quick check an NPM package or a `package.json`. The application summarizes the result in descriptive forms.
-
-<img alt="summary" src="https://resources.corp-check.corpjs.com/pics/summary.png" width="100%" />
-
-The application is also be able to show the result in a detailed interactive view:
-
-<img alt="detailed-view" src="https://resources.corp-check.corpjs.com/pics/detailed-view.png" width="100%" />
-
-## Corp-Check [Command Line Interface](https://www.npmjs.com/package/corp-check-cli)
-
-The CLI is also able to check NPM packages with
-
-```
-corp-check npm redux
-```
-
-but its greatest power is not there. The CLI's primary function is tight bounded to a project as a build or deploy phase. You can define an NPM script like:
-
-```json
-{
-  ...
-  "scripts": {
-    "corp-check": "corp-check ."
-  },
-  ...
-}
-```
-
-and automatically run it before committing or pushing into a repository. The valid choice could be also to live in a deploy process flow.
 
 ## The basic process
 
