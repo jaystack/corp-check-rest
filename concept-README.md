@@ -20,11 +20,11 @@ Corp-Check provides an open-source solution for these problems above. **Corp-Che
 
 This is useful for quick check an NPM package or a `package.json`. The application summarizes the result in descriptive forms.
 
-<img alt="summary" src="https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/summary.png" width="100%" />
+<img alt="summary" src="https://resources.corp-check.corpjs.com/pics/summary.png" width="100%" />
 
 The application is also be able to show the result in a detailed interactive view:
 
-<img alt="detailed-view" src="https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/detailed-view.png" width="100%" />
+<img alt="detailed-view" src="https://resources.corp-check.corpjs.com/pics/detailed-view.png" width="100%" />
 
 ## Corp-Check [Command Line Interface](https://www.npmjs.com/package/corp-check-cli)
 
@@ -66,7 +66,7 @@ Every package in the hierarchy has a local final score that are formed by the fo
 
 <!-- s_f^p = \min_{d} \left\{ \prod_{e} s_e, \sqrt{A s_f^d} \right\} -->
 
-![score-equation](https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/score-calc2.png)
+![score-equation](https://resources.corp-check.corpjs.com/pics/score-calc2.png)
 
 First the scores - given by the evaluators - are multiplied to each other. That makes the self-score of a package. The final score is made by taking the minimum of the self-score and the root squares of its first direct dependencies' final score. In the equation, `A` is a free parameter. This makes the method tunable. For now, fix it to `1`.
 
@@ -90,7 +90,7 @@ Corp-Check gives a nominal qualification for the examined root package. This is 
 
 Assume that we have the following dependency hierarchy:
 
-<img alt="hierarchy" src="https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/hierarchy.png" height="150px"/>
+<img alt="hierarchy" src="https://resources.corp-check.corpjs.com/pics/hierarchy.png" height="150px"/>
 
 For now, we have the following evaluators:
 
@@ -143,7 +143,7 @@ Then the self-score of `D` is `0 × 1 × 0.7 = 0`. Its final score is the same b
 
 We can imagine the zero score as a poison, which kills the entire tree.
 
-<img alt="zero-effect" src="https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/zero-effect.png" height="150px"/>
+<img alt="zero-effect" src="https://resources.corp-check.corpjs.com/pics/zero-effect.png" height="150px"/>
 
 ### The attribute score
 
@@ -151,7 +151,7 @@ NPM gives `popularity`, `quality` and `maintance` attributes for the packages. T
 
 <!-- s_A = \frac{w_p p + w_q q + w_m m}{w_p + w_q + w_m} -->
 
-![npm-scores](https://s3.eu-central-1.amazonaws.com/corp-check-rest-filestorage-prod/pics/npm-scores.png)
+![npm-scores](https://resources.corp-check.corpjs.com/pics/npm-scores.png)
 
 ## Rules of evaluation
 
