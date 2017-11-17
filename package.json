@@ -39,7 +39,7 @@
   "dependencies": {
     "amqplib": "^0.5.1",
     "aws-sdk": "^2.137.0",
-    "corp-check-core": "^1.0.9",
+    "corp-check-core": "^2.0.0",
     "functionly": "0.0.19",
     "hash-sum": "^1.0.2",
     "moment": "^2.19.1",

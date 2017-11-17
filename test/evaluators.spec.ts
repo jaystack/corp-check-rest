@@ -1245,7 +1245,7 @@ describe('evaluators', () => {
           },
           rule: {},
           depth: 0,
-          packageMeta: { npmScores: undefined },
+          packageMeta: { name: 'name', npmScores: undefined },
           unknownPackages: []
         });
         expect(true).toBe(false);
@@ -1265,6 +1265,7 @@ describe('evaluators', () => {
         rule: {},
         depth: 0,
         packageMeta: {
+          name: 'name',
           npmScores: {
             quality: 0.9,
             popularity: 0.9,
@@ -1306,6 +1307,7 @@ describe('evaluators', () => {
         rule: {},
         depth: 0,
         packageMeta: {
+          name: 'name',
           npmScores: {
             quality: null,
             popularity: 0.9,
@@ -1347,6 +1349,7 @@ describe('evaluators', () => {
         rule: {},
         depth: 0,
         packageMeta: {
+          name: 'name',
           npmScores: {
             quality: undefined,
             popularity: 0.9,
@@ -1388,7 +1391,7 @@ describe('evaluators', () => {
         },
         rule: {},
         depth: 0,
-        packageMeta: { npmScores: scores },
+        packageMeta: { name: 'name', npmScores: scores },
         unknownPackages: []
       });
 
@@ -1424,6 +1427,7 @@ describe('evaluators', () => {
         rule: {},
         depth: 0,
         packageMeta: {
+          name: 'name',
           npmScores: {
             quality: 0.8,
             popularity: 0.6,
@@ -1465,6 +1469,7 @@ describe('evaluators', () => {
         rule: {},
         depth: 0,
         packageMeta: {
+          name: 'name',
           npmScores: {
             quality: 0.6,
             popularity: 0.5,
@@ -1506,6 +1511,7 @@ describe('evaluators', () => {
         rule: { qualityWeight: 0 },
         depth: 0,
         packageMeta: {
+          name: 'name',
           npmScores: {
             quality: 0.5,
             popularity: 0.9,
@@ -1547,6 +1553,7 @@ describe('evaluators', () => {
         rule: { popularityWeight: 0 },
         depth: 0,
         packageMeta: {
+          name: 'name',
           npmScores: {
             quality: 0.9,
             popularity: 0.5,
@@ -1588,6 +1595,7 @@ describe('evaluators', () => {
         rule: { maintenanceWeight: 0 },
         depth: 0,
         packageMeta: {
+          name: 'name',
           npmScores: {
             quality: 0.9,
             popularity: 0.9,

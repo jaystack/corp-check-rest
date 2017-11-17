@@ -905,16 +905,11 @@ describe('functional services', () => {
       }
     });
 
-    it('empty meta', async () => {
-      const res = await createCacheItem.handle(_, _);
-      expect(res).toEqual(undefined);
-    });
-
     it('1 meta', async () => {
       let counter = 0;
       const moduleMetadataCache: any = {
         async update(filter, update, options) {
-          expect(update.$set.prop).toEqual('p1');
+          expect(update.$set.name).toEqual('key');
           expect(update.$set._id).toEqual(filter._id);
           expect(typeof update.$set.date).toEqual('number');
           counter++;
@@ -922,9 +917,12 @@ describe('functional services', () => {
       };
 
       const res = await createCacheItem.handle(
-        {
-          key: { prop: 'p1' }
-        },
+        [
+          {
+            name: 'key',
+            npmScores: { quality: 0.5, popularity: 0.5, maintenance: 0.5 }
+          }
+        ],
         moduleMetadataCache
       );
       expect(res).toEqual(undefined);
@@ -935,7 +933,7 @@ describe('functional services', () => {
       let counter = 0;
       const moduleMetadataCache: any = {
         async update(filter, update, options) {
-          expect(update.$set.prop).toEqual('p1');
+          expect(update.$set.name === 'key' || update.$set.name === 'key2').toEqual(true);
           expect(update.$set._id).toEqual(filter._id);
           expect(typeof update.$set.date).toEqual('number');
           counter++;
@@ -943,10 +941,16 @@ describe('functional services', () => {
       };
 
       const res = await createCacheItem.handle(
-        {
-          key: { prop: 'p1' },
-          key2: { prop: 'p1' }
-        },
+        [
+          {
+            name: 'key',
+            npmScores: { quality: 0.5, popularity: 0.5, maintenance: 0.5 }
+          },
+          {
+            name: 'key2',
+            npmScores: { quality: 0.5, popularity: 0.5, maintenance: 0.5 }
+          }
+        ],
         moduleMetadataCache
       );
       expect(res).toEqual(undefined);
@@ -957,7 +961,7 @@ describe('functional services', () => {
       let counter = 0;
       const moduleMetadataCache: any = {
         async update(filter, update, options) {
-          expect(update.$set.prop).toEqual('p1');
+          expect(update.$set.name === 'key' || update.$set.name === 'key3').toEqual(true);
           expect(update.$set._id).toEqual(filter._id);
           expect(typeof update.$set.date).toEqual('number');
           counter++;
@@ -965,11 +969,21 @@ describe('functional services', () => {
       };
 
       const res = await createCacheItem.handle(
-        {
-          key: { prop: 'p1' },
-          key2: { prop: 'p3', date: 1234 },
-          key3: { prop: 'p1' }
-        },
+        [
+          {
+            name: 'key',
+            npmScores: { quality: 0.5, popularity: 0.5, maintenance: 0.5 }
+          },
+          {
+            name: 'key2',
+            date: 1234,
+            npmScores: { quality: 0.5, popularity: 0.5, maintenance: 0.5 }
+          },
+          {
+            name: 'key3',
+            npmScores: { quality: 0.5, popularity: 0.5, maintenance: 0.5 }
+          }
+        ],
         moduleMetadataCache
       );
       expect(res).toEqual(undefined);
@@ -997,7 +1011,7 @@ describe('functional services', () => {
       };
 
       const res = await getModuleMeta.handle(_, moduleMetadataCache);
-      expect(res).toEqual({});
+      expect(res).toEqual([]);
     });
 
     it('1 module', async () => {
@@ -1008,16 +1022,14 @@ describe('functional services', () => {
 
           return {
             async toArray() {
-              return [ { date: now, _id: 'module1' } ];
+              return [ { name: 'module1', date: now, _id: 'module1' } ];
             }
           };
         }
       };
 
       const res = await getModuleMeta.handle([ 'module1' ], moduleMetadataCache);
-      expect(res).toEqual({
-        module1: { date: now, _id: 'module1' }
-      });
+      expect(res).toEqual([ { name: 'module1', date: now, _id: 'module1' } ]);
     });
 
     it('2 modules', async () => {
@@ -1028,17 +1040,17 @@ describe('functional services', () => {
 
           return {
             async toArray() {
-              return [ { date: now, _id: 'module1' }, { date: now, _id: 'module2' } ];
+              return [ { name: 'module1', date: now, _id: 'module1' }, { name: 'module2', date: now, _id: 'module2' } ];
             }
           };
         }
       };
 
       const res = await getModuleMeta.handle([ 'module1', 'module2' ], moduleMetadataCache);
-      expect(res).toEqual({
-        module1: { date: now, _id: 'module1' },
-        module2: { date: now, _id: 'module2' }
-      });
+      expect(res).toEqual([
+        { name: 'module1', date: now, _id: 'module1' },
+        { name: 'module2', date: now, _id: 'module2' }
+      ]);
     });
 
     it('3 modules - one expired', async () => {
@@ -1049,17 +1061,21 @@ describe('functional services', () => {
 
           return {
             async toArray() {
-              return [ { date: now, _id: 'module1' }, { date: 0, _id: 'module2' }, { date: now, _id: 'module3' } ];
+              return [
+                { name: 'module1', date: now, _id: 'module1' },
+                { name: 'module2', date: 0, _id: 'module2' },
+                { name: 'module3', date: now, _id: 'module3' }
+              ];
             }
           };
         }
       };
 
       const res = await getModuleMeta.handle([ 'module1', 'module2', 'module3' ], moduleMetadataCache);
-      expect(res).toEqual({
-        module1: { date: now, _id: 'module1' },
-        module3: { date: now, _id: 'module3' }
-      });
+      expect(res).toEqual([
+        { name: 'module1', date: now, _id: 'module1' },
+        { name: 'module3', date: now, _id: 'module3' }
+      ]);
     });
 
     it('3 modules - expiration default', async () => {
@@ -1071,9 +1087,9 @@ describe('functional services', () => {
           return {
             async toArray() {
               return [
-                { date: now, _id: 'module1' },
-                { date: now - (2 * 24 * 60 * 60 * 1000 + 1000), _id: 'module2' },
-                { date: now - (2 * 24 * 60 * 60 * 1000 - 1000), _id: 'module3' }
+                { name: 'module1', date: now, _id: 'module1' },
+                { name: 'module2', date: now - (2 * 24 * 60 * 60 * 1000 + 1000), _id: 'module2' },
+                { name: 'module3', date: now - (2 * 24 * 60 * 60 * 1000 - 1000), _id: 'module3' }
               ];
             }
           };
@@ -1081,10 +1097,10 @@ describe('functional services', () => {
       };
 
       const res = await getModuleMeta.handle([ 'module1', 'module2', 'module3' ], moduleMetadataCache);
-      expect(res).toEqual({
-        module1: { date: now, _id: 'module1' },
-        module3: { date: now - (2 * 24 * 60 * 60 * 1000 - 1000), _id: 'module3' }
-      });
+      expect(res).toEqual([
+        { name: 'module1', date: now, _id: 'module1' },
+        { name: 'module3', date: now - (2 * 24 * 60 * 60 * 1000 - 1000), _id: 'module3' }
+      ]);
     });
 
     it('3 modules - expiration custom', async () => {
@@ -1099,9 +1115,9 @@ describe('functional services', () => {
           return {
             async toArray() {
               return [
-                { date: now, _id: 'module1' },
-                { date: now - (hours * 60 * 60 * 1000 + 1000), _id: 'module2' },
-                { date: now - (hours * 60 * 60 * 1000 - 1000), _id: 'module3' }
+                { name: 'module1', date: now, _id: 'module1' },
+                { name: 'module2', date: now - (hours * 60 * 60 * 1000 + 1000), _id: 'module2' },
+                { name: 'module3', date: now - (hours * 60 * 60 * 1000 - 1000), _id: 'module3' }
               ];
             }
           };
@@ -1109,10 +1125,10 @@ describe('functional services', () => {
       };
 
       const res = await getModuleMeta.handle([ 'module1', 'module2', 'module3' ], moduleMetadataCache);
-      expect(res).toEqual({
-        module1: { date: now, _id: 'module1' },
-        module3: { date: now - (hours * 60 * 60 * 1000 - 1000), _id: 'module3' }
-      });
+      expect(res).toEqual([
+        { name: 'module1', date: now, _id: 'module1' },
+        { name: 'module3', date: now - (hours * 60 * 60 * 1000 - 1000), _id: 'module3' }
+      ]);
 
       delete process.env.MODULE_META_EXPIRATION_IN_HOURS;
       expect(process.env.MODULE_META_EXPIRATION_IN_HOURS).toBe(undefined);

@@ -737,7 +737,7 @@ describe('services', () => {
       const stage = 'test';
       expect(process.env.RABBITMQ_QUEUE_NAME).toEqual(undefined);
       process.env.RABBITMQ_QUEUE_NAME = taskName;
-      const expirationValue = "10000"
+      const expirationValue = '10000';
       expect(process.env.RABBITMQ_MESSAGE_EXPIRATION).toEqual(undefined);
       process.env.RABBITMQ_MESSAGE_EXPIRATION = expirationValue;
 
@@ -830,9 +830,7 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
-        },
+        meta: [ { name: 'name', npmScores: { quality: 1, popularity: 1, maintenance: 1 } } ],
         tree: {
           name: 'name',
           version: 'version',
@@ -857,7 +855,7 @@ describe('services', () => {
 
       expect(license).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.license,
         unknownPackages: [],
         depth: 0
@@ -865,7 +863,7 @@ describe('services', () => {
 
       expect(version).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.version,
         unknownPackages: [],
         depth: 0
@@ -873,7 +871,7 @@ describe('services', () => {
 
       expect(npmScores).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.npmScores,
         unknownPackages: [],
         depth: 0
@@ -886,9 +884,7 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
-        },
+        meta: [ { name: 'name', npmScores: { quality: 1, popularity: 1, maintenance: 1 } } ],
         tree: {
           name: 'corp-check-cli',
           version: 'version',
@@ -933,9 +929,7 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
-        },
+        meta: [ { name: 'name', npmScores: { quality: 1, popularity: 1, maintenance: 1 } } ],
         tree: {
           name: 'name',
           version: 'version',
@@ -972,9 +966,7 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
-        },
+        meta: [ { name: 'name', npmScores: { quality: 1, popularity: 1, maintenance: 1 } } ],
         tree: {
           name: 'name1',
           version: 'version',
@@ -1026,9 +1018,7 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
-        },
+        meta: [ { name: 'name', npmScores: { quality: 1, popularity: 1, maintenance: 1 } } ],
         tree: {
           name: 'name1',
           version: 'version',
@@ -1094,9 +1084,7 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 0.9 });
 
       const data = {
-        meta: {
-          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
-        },
+        meta: [ { name: 'name', npmScores: { quality: 1, popularity: 1, maintenance: 1 } } ],
         tree: {
           name: 'name',
           version: 'version',
@@ -1121,7 +1109,7 @@ describe('services', () => {
 
       expect(license).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.license,
         unknownPackages: [],
         depth: 0
@@ -1129,7 +1117,7 @@ describe('services', () => {
 
       expect(version).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.version,
         unknownPackages: [],
         depth: 0
@@ -1137,7 +1125,7 @@ describe('services', () => {
 
       expect(npmScores).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.npmScores,
         unknownPackages: [],
         depth: 0
@@ -1150,9 +1138,7 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 0.5 });
 
       const data = {
-        meta: {
-          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
-        },
+        meta: [ { name: 'name', npmScores: { quality: 1, popularity: 1, maintenance: 1 } } ],
         tree: {
           name: 'name',
           version: 'version',
@@ -1177,7 +1163,7 @@ describe('services', () => {
 
       expect(license).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.license,
         unknownPackages: [],
         depth: 0
@@ -1185,7 +1171,7 @@ describe('services', () => {
 
       expect(version).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.version,
         unknownPackages: [],
         depth: 0
@@ -1193,7 +1179,7 @@ describe('services', () => {
 
       expect(npmScores).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.npmScores,
         unknownPackages: [],
         depth: 0
@@ -1206,9 +1192,7 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 0 });
 
       const data = {
-        meta: {
-          name: { npmScores: { quality: 1, popularity: 1, maintenance: 1 } }
-        },
+        meta: [ { name: 'name', npmScores: { quality: 1, popularity: 1, maintenance: 1 } } ],
         tree: {
           name: 'name',
           version: 'version',
@@ -1233,7 +1217,7 @@ describe('services', () => {
 
       expect(license).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.license,
         unknownPackages: [],
         depth: 0
@@ -1241,7 +1225,7 @@ describe('services', () => {
 
       expect(version).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.version,
         unknownPackages: [],
         depth: 0
@@ -1249,7 +1233,7 @@ describe('services', () => {
 
       expect(npmScores).toBeCalledWith({
         node: data.tree,
-        packageMeta: data.meta.name,
+        packageMeta: data.meta[0],
         rule: ruleSet.npmScores,
         unknownPackages: [],
         depth: 0
@@ -1262,11 +1246,11 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { props: 1 } },
-          name0: { npmScores: { props: 2 } },
-          name1: { npmScores: { props: 3 } }
-        },
+        meta: [
+          { name: 'name', npmScores: { props: 1 } },
+          { name: 'name0', npmScores: { props: 2 } },
+          { name: 'name1', npmScores: { props: 3 } }
+        ],
         tree: {
           name: 'name',
           version: 'version',
@@ -1321,7 +1305,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 0
@@ -1330,7 +1314,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1339,7 +1323,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1351,7 +1335,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 0
@@ -1360,7 +1344,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1369,7 +1353,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1381,7 +1365,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 0
@@ -1390,7 +1374,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -1399,7 +1383,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -1417,11 +1401,11 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { props: 1 } },
-          name0: { npmScores: { props: 2 } },
-          name1: { npmScores: { props: 3 } }
-        },
+        meta: [
+          { name: 'name', npmScores: { props: 1 } },
+          { name: 'name0', npmScores: { props: 2 } },
+          { name: 'name1', npmScores: { props: 3 } }
+        ],
         tree: {
           name: 'name',
           version: 'version',
@@ -1476,7 +1460,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 0
@@ -1485,7 +1469,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1494,7 +1478,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1506,7 +1490,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 0
@@ -1515,7 +1499,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1524,7 +1508,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1536,7 +1520,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 0
@@ -1545,7 +1529,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -1554,7 +1538,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -1572,11 +1556,11 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { props: 1 } },
-          name0: { npmScores: { props: 2 } },
-          name1: { npmScores: { props: 3 } }
-        },
+        meta: [
+          { name: 'name', npmScores: { props: 1 } },
+          { name: 'name0', npmScores: { props: 2 } },
+          { name: 'name1', npmScores: { props: 3 } }
+        ],
         tree: {
           name: 'name',
           version: 'version',
@@ -1631,7 +1615,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 0
@@ -1640,7 +1624,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1649,7 +1633,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1661,7 +1645,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 0
@@ -1670,7 +1654,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1679,7 +1663,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1691,7 +1675,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 0
@@ -1700,7 +1684,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -1709,7 +1693,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -1727,11 +1711,11 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { props: 1 } },
-          name0: { npmScores: { props: 2 } },
-          name1: { npmScores: { props: 3 } }
-        },
+        meta: [
+          { name: 'name', npmScores: { props: 1 } },
+          { name: 'name0', npmScores: { props: 2 } },
+          { name: 'name1', npmScores: { props: 3 } }
+        ],
         tree: {
           name: 'name',
           version: 'version',
@@ -1786,7 +1770,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 0
@@ -1795,7 +1779,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1804,7 +1788,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1816,7 +1800,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 0
@@ -1825,7 +1809,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1834,7 +1818,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1846,7 +1830,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 0
@@ -1855,7 +1839,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -1864,7 +1848,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -1880,11 +1864,11 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { props: 1 } },
-          name0: { npmScores: { props: 2 } },
-          name1: { npmScores: { props: 3 } }
-        },
+        meta: [
+          { name: 'name', npmScores: { props: 1 } },
+          { name: 'name0', npmScores: { props: 2 } },
+          { name: 'name1', npmScores: { props: 3 } }
+        ],
         tree: {
           name: 'name',
           version: 'version',
@@ -1939,7 +1923,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 0
@@ -1948,7 +1932,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1957,7 +1941,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -1969,7 +1953,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 0
@@ -1978,7 +1962,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1987,7 +1971,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -1999,7 +1983,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 0
@@ -2008,7 +1992,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -2017,7 +2001,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[1],
-            packageMeta: data.meta.name1,
+            packageMeta: data.meta[2],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -2035,11 +2019,11 @@ describe('services', () => {
       npmScores.mockReturnValue({ score: 1 });
 
       const data = {
-        meta: {
-          name: { npmScores: { props: 1 } },
-          name0: { npmScores: { props: 2 } },
-          name00: { npmScores: { props: 3 } }
-        },
+        meta: [
+          { name: 'name', npmScores: { props: 1 } },
+          { name: 'name0', npmScores: { props: 2 } },
+          { name: 'name00', npmScores: { props: 3 } }
+        ],
         tree: {
           name: 'name',
           version: 'version',
@@ -2096,7 +2080,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 0
@@ -2105,7 +2089,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 1
@@ -2114,7 +2098,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0].dependencies[0],
-            packageMeta: data.meta.name00,
+            packageMeta: data.meta[2],
             rule: ruleSet.license,
             unknownPackages: [],
             depth: 2
@@ -2126,7 +2110,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 0
@@ -2135,7 +2119,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 1
@@ -2144,7 +2128,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0].dependencies[0],
-            packageMeta: data.meta.name00,
+            packageMeta: data.meta[2],
             rule: ruleSet.version,
             unknownPackages: [],
             depth: 2
@@ -2156,7 +2140,7 @@ describe('services', () => {
         [
           {
             node: data.tree,
-            packageMeta: data.meta.name,
+            packageMeta: data.meta[0],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 0
@@ -2165,7 +2149,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0],
-            packageMeta: data.meta.name0,
+            packageMeta: data.meta[1],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 1
@@ -2174,7 +2158,7 @@ describe('services', () => {
         [
           {
             node: data.tree.dependencies[0].dependencies[0],
-            packageMeta: data.meta.name00,
+            packageMeta: data.meta[2],
             rule: ruleSet.npmScores,
             unknownPackages: [],
             depth: 2

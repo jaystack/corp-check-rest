@@ -2,7 +2,6 @@ import { Service, param, injectable, InjectionScope, inject } from 'functionly';
 import {
   Info as Data,
   Node,
-  Meta,
   PackageMeta,
   Qualification,
   Evaluation,
@@ -32,7 +31,7 @@ const getNodeScore = (selfScore: number, dependencyScores: number[]): number => 
 const evaluate = (
   evaluators: Evaluator[],
   rules: any[],
-  meta: Meta,
+  meta: PackageMeta[],
   node: Node,
   unknownPackages: string[] = [],
   depth: number = 0
@@ -40,7 +39,7 @@ const evaluate = (
   const evaluations = evaluators.map((evaluator, i) =>
     evaluator({
       node,
-      packageMeta: meta[node.name] || ({} as PackageMeta),
+      packageMeta: meta.find(m => m.name === node.name) || ({} as PackageMeta),
       rule: rules[i] || {},
       unknownPackages,
       depth
