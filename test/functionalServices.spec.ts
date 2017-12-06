@@ -742,7 +742,7 @@ describe('functional services', () => {
         }
       };
 
-      const res = await complete.handle(_, _, _, _, evaluationsApi, _);
+      const res = await complete.handle(_, _, _, _, _, evaluationsApi, _);
       expect(res).toEqual(undefined);
     });
 
@@ -769,7 +769,7 @@ describe('functional services', () => {
         expect(meta).toEqual({ pkg: {} });
       };
 
-      const res = await complete.handle('1', { tree: {}, meta: { pkg: {} } }, _, _, evaluationsApi, createCacheItems);
+      const res = await complete.handle('1', { tree: {}, meta: { pkg: {} } }, _, _, _, evaluationsApi, createCacheItems);
       expect(res).toEqual(undefined);
     });
 
@@ -791,7 +791,7 @@ describe('functional services', () => {
       };
 
       try {
-        const res = await complete.handle('1', { tree: {} }, _, _, evaluationsApi, _);
+        const res = await complete.handle('1', { tree: {} }, _, _, _, evaluationsApi, _);
         expect(res).toEqual(undefined);
       } catch (e) {
         expect(e).toEqual(undefined);
@@ -804,7 +804,7 @@ describe('functional services', () => {
           const { _id, meta, type } = params;
           expect(Object.keys(params)).toEqual([ '_id', 'meta', 'type' ]);
           expect(_id).toEqual('123456789');
-          expect(meta).toEqual({ error: 'Error: error' });
+          expect(meta).toEqual({ error: 'Error: error', message: 'msg' });
           expect(type).toEqual(StateType.FAILED);
         }
       };
@@ -819,7 +819,7 @@ describe('functional services', () => {
         }
       };
 
-      const res = await complete.handle('1', _, 'Error: error', packageInfoApi, evaluationsApi, _);
+      const res = await complete.handle('1', _, 'Error: error', 'msg', packageInfoApi, evaluationsApi, _);
       expect(res).toEqual(undefined);
     });
   });
