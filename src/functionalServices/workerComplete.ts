@@ -11,7 +11,7 @@ import { StateType } from '../types';
 
 @rest({ path: '/complete', methods: [ 'post' ] })
 @aws({ type: 'nodejs6.10', memorySize: 512, timeout: 10 })
-export class Complete extends FunctionalService {
+export class Complete extends CorpCheckRestService {
 	public async handle(
 		@param cid,
 		@param data,
