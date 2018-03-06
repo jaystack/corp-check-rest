@@ -42,7 +42,7 @@
     "corp-check-core": "^2.0.0",
     "functionly": "0.0.19",
     "hash-sum": "^1.0.2",
-    "moment": "^2.19.1",
+    "moment": "^2.21.0",
     "ramda": "^0.24.1",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
